@@ -82,11 +82,63 @@ public:
     ++m_size;
     // TODO
   }
+  class iterator {
+  public:
+    /*!
+     * Constructs the iterator.
+     * \param pointer to a value in the container.
+     */
+    iterator(pointer pointer = nullptr) { m_pointer = pointer; }
+    /// Default copy constructor.
+    iterator(const iterator &copy) = default;
+    /// Default destructor.
+    ~iterator() = default;
+    /// Dereference operator.
+    reference operator*() { return *m_pointer; }
+    /// Constant dereference operator.
+    const_reference operator*() const { return *m_pointer; }
+    /// Arrow operator.
+    pointer operator->() const { return m_pointer; }
+    /// Pre-increment.
+    iterator operator++() {
+      ++m_pointer;
+      return iterator(m_pointer);
+    }
+    /// Pos-increment.
+    iterator operator++(int) {
+      pointer copy = m_pointer;
+      ++m_pointer;
+      return iterator(copy);
+    }
+    /// Pre-decrement.
+    iterator operator--() {
+      --m_pointer;
+      return iterator(m_pointer);
+    }
+    /// Pos-decrement.
+    iterator operator--(int) {
+      pointer copy = m_pointer;
+      --m_pointer;
+      return iterator(copy);
+    }
+    /*!
+     * Checks whether two iterators are different.
+     * \return flag that indicates whether iterator are different.
+     */
+    bool operator!=(const iterator &right) {
+      return m_pointer != right.m_pointer;
+    }
+    /*!
+     * Checks whether two iterator are equal.
+     * \return flag that indicates whether iterator are equal.
+     */
+    bool operator==(const iterator &right) {
+      return m_pointer == right.m_pointer;
+    }
 
-  // TODO
-  class iterator {};
-  // TODO
-  class const_iterator {};
+  private:
+    pointer m_pointer; //!< Pointer to a element in the container.
+  };
 
 private:
   pointer m_array{nullptr};
