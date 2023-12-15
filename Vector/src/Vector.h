@@ -2,14 +2,13 @@
 #define VECTOR_H
 
 #include <initializer_list>
-#include <vector>
+#include <iterator>
 
 // Namespace for sequential containers(sc).
 namespace sc {
 template <typename T> class Vector {
 public:
   class iterator;
-  class const_iterator;
   //=== Aliases.
   using value_type = T;
   using pointer = value_type *;
@@ -20,21 +19,52 @@ public:
   using difference_type = std::ptrdiff_t;
 
   //=== [I] Members Functions
-  Vector(size_type size = 0, value_type value = T()) {
-    if (size > 0) {
-      m_size = size;
+  /*!
+   * Default constructor. Creates a vector with "count" copies of "value".
+   * In case no parameters are provided, the vector will be created empty.
+   * \param count number of elements to insert.
+   * \param value data to store in the vector.
+   */
+  Vector(size_type count = 0, value_type value = T()) {
+    if (count > 0) {
+      m_size = count;
       m_array = new T[m_size];
       for (size_type index{0}; index < m_size; ++index) {
         m_array[index] = value;
       }
     }
   }
+  /*!
+   * Creates a vector with the same size and the same elements as the ilist.
+   * \param ilist initializer_list with elements to insert in the vector.
+   */
   Vector(std::initializer_list<value_type> ilist) { return assign(ilist); }
-
-  Vector assing(std::initializer_list<value_type> ilist) {
-    if (ilist.size() < m_size) {
-      m_size = ilist.size();
+  /*!
+   * Creates a vector with the data in the range [begin, end).
+   * \param begin beginning of the range.
+   * \param end ending of the range (not included).
+   */
+  template <typename InputIt> Vector(InputIt begin, InputIt end) {
+    assign(begin, end);
+  }
+  /*!
+   * Makes the vector contain the same data stored in the range [begin, end).
+   * \param begin beginning of the range.
+   * \param end ending of the range (not included).
+   */
+  template <typename InputIt> Vector assign(InputIt begin, InputIt end) {
+    reserve(std::distance(begin, end));
+    m_size = std::distance(begin, end);
+    for (size_type index{0}; begin != end; ++begin, ++index) {
+      m_array[index] = *begin;
     }
+  }
+  /*!
+   * Makes the vector equal to the ilist.
+   * \param ilist initializer_list with elements to insert in the vector.
+   */
+  Vector assing(std::initializer_list<value_type> ilist) {
+    m_size = min(m_size, ilist.size());
     size_type index{0};
     while (index < m_size) {
       m_array[index] = ilist[index];
@@ -45,14 +75,19 @@ public:
     }
     return *this;
   }
+  /*!
+   * Makes the vector equal to the ilist.
+   * \param ilist initializer_list with elements to insert in the vector.
+   */
   Vector operator=(std::initializer_list<value_type> ilist) {
     return assign(ilist);
   }
-  template <typename InputIt> Vector assign(InputIt begin, InputIt end) {
-    while (begin != end) {
+  /// Deallocates memory.
+  ~Vector() {
+    if (m_array != nullptr) {
+      delete[] m_array;
     }
   }
-  template <typename InputIt> Vector(InputIt begin, InputIt end) {}
 
   //=== [II] Element Access
   // TODO
