@@ -89,19 +89,26 @@ public:
   }
 
   //=== [II] Element Access
-  // TODO
-  void resize(size_type size) {}
-  void reserve(size_type size) {}
-  bool empty() const { return m_size == 0; }
-  size_type size() const { return m_size; }
-  size_type capacity() const { return m_capacity; }
+  /// Access the element in the front of the container.
   reference front() { return m_array[0]; }
+  /// Access the element in the front of the container.
   const_reference front() const { return m_array[0]; }
+  /// Access the element in the end of the container.
   reference back() { return m_array[m_size - 1]; }
+  /// Access the element in the end of the container.
   const_reference back() const { return m_array[m_size - 1]; }
-  pointer data() const { return m_array; }
+  /// Consults the pointer to the underlying array storing the data.
+  pointer data() { return m_array; }
+  /// Consults the pointer to the underlying array storing the data.
+  const_pointer data() const { return m_array; }
+  /// Access the element at the "pos" position in the container.
   reference at(size_type pos) { return m_array[pos]; }
+  /// Access the element at the "pos" position in the container.
   const_reference at(size_type pos) const { return m_array[pos]; }
+  /// Access the element at the "pos" position in the container.
+  reference operator[](size_type pos) { return at(pos); }
+  /// Access the element at the "pos" position in the container.
+  const_reference operator[](size_type pos) const { return at(pos); }
 
   //=== [III] Iterators
   //=== [IV] Capacity
