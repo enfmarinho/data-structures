@@ -123,6 +123,45 @@ public:
   iterator end() { return iterator(m_array + m_size); }
 
   //=== [IV] Capacity
+  /// Consults whether the container is empty.
+  bool empty() const { return m_size == 0; }
+  /// Consults the number of elements in the container.
+  size_type size() const { return m_size; }
+  /*!\
+   * If new_capacity is greater than the current capacity of the container, the
+   * capacity if increased to new_capacity, otherwise the function does nothing.
+   * \param new_capacity capacity that the container should have.
+   */
+  void reserve(size_type new_capacity) {
+    if (new_capacity > m_capacity) {
+      pointer tmp = new value_type[new_capacity];
+      m_capacity = new_capacity;
+      for (size_type index{0}; index < m_size; ++index) {
+        tmp[index] = m_array[index];
+      }
+      delete[] m_array;
+      m_array = tmp;
+    }
+  }
+  /// Consults the capacity of the container.
+  size_type capacity() const { return m_capacity; }
+  /*!
+   * Frees up unused memory, reducing the capacity of the container. Makes
+   * the capacity equal to size. If the capacity is greater than size, all
+   * references to elements are invalidated.
+   */
+  void shrink_to_fit() {
+    if (m_capacity > m_size) {
+      pointer tmp = new value_type[m_size];
+      for (int index{0}; index < m_size; ++index) {
+        tmp[index] = m_array[m_size];
+      }
+      delete[] m_array;
+      m_capacity = m_size;
+      m_array = tmp;
+    }
+  }
+
   //=== [V] Modifiers
   void clear() {}
   iterator insert(const_iterator pos, const_reference value) {}
