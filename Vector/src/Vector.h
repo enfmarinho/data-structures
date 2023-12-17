@@ -111,6 +111,17 @@ public:
   const_reference operator[](size_type pos) const { return at(pos); }
 
   //=== [III] Iterators
+  /*!
+   * Gets a iterator to the beginning of the container.
+   * \return iterator pointing to the beginning of the container.
+   */
+  iterator begin() { return iterator(m_array); }
+  /*!
+   * Gets a iterator to the element past the last element of  the container.
+   * \return iterator to the element past the last element of the container.
+   */
+  iterator end() { return iterator(m_array + m_size); }
+
   //=== [IV] Capacity
   //=== [V] Modifiers
   void clear() {}
