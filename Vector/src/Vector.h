@@ -163,16 +163,173 @@ public:
   }
 
   //=== [V] Modifiers
-  void clear() {}
-  iterator insert(const_iterator pos, const_reference value) {}
-  iterator insert(const_iterator pos, size_type count, const_reference value) {}
-  template <class InputIt>
-  iterator insert(const_iterator pos, InputIt first, InputIt last) {}
-  iterator insert(const_iterator pos, std::initializer_list<T> ilist) {}
-  void push_back(value_type value) {
+  /// Removes all elements of the container, i.e. empties it.
+  void clear() { m_size = 0; }
+  /*!
+   * Inserts the data "value" before the position pointed by "pos".
+   * \param pos iterator pointing to the element past the position to insert.
+   * \param value data to insert.
+   * \return iterator pointing to the inserted value.
+   */
+  iterator insert(iterator pos, const_reference value) {
+    size_type pos_index = std::distance(m_array, &pos);
+    if (m_capacity == 0) {
+      reserve(1);
+      pos_index = 0;
+    } else if (m_size == m_capacity) {
+      reserve(2 * m_size);
+    }
+    // std::copy_backward(pos, end(), --end()); // Compiler does not recognize
+    // value_type.
+    pos = iterator(m_array + pos_index);
+    for (iterator it_first = pos, it_last = end(); it_first != end();
+         ++it_first, --it_last) {
+      *it_last = *it_first;
+    }
+    *pos = value;
     ++m_size;
-    // TODO
+    return pos;
   }
+  /*!
+   * Inserts "count" copies of "value" before position pointed by "pos".
+   * \param pos iterator pointing to the element past the position to insert.
+   * \param count number of copies to insert.
+   * \param value data to insert.
+   * \return iterator pointing to the first element inserted, or "pos" if
+   *         "count" == 0.
+   */
+  iterator insert(iterator pos, size_type count, const_reference value) {
+    size_type pos_index = std::distance(m_array, &pos);
+    if (m_capacity == 0) {
+      reserve(count);
+    } else if (m_capacity < m_size + count) {
+      reserve(m_size + count);
+    }
+    pos = iterator(m_array + pos_index);
+
+    // TODO try to make it work with copy_backward.
+    for (iterator it_first = pos, it_last = end() + count - 1;
+         it_first != end(); ++it_first, --it_last) {
+      *it_last = *it_first;
+    }
+    for (auto runner = pos; runner != end(); ++runner) {
+      *runner = value;
+    }
+    m_size += count;
+    return pos;
+  }
+  /*!
+   * Inserts elements in range [first, last) before position pointed by "pos".
+   * \param first beginning of the range of elements..
+   * \param last end of the range of elements.
+   * \return iterator pointing to the first element inserted, or "pos" if
+   *         "first" == "last".
+   */
+  template <class InputIt>
+  iterator insert(iterator pos, InputIt first, InputIt last) {
+    size_type pos_index = std::distance(m_array, &pos);
+    size_type number_elements = std::distance(first, last);
+    if (m_capacity == 0) {
+      reserve(number_elements);
+    } else if (m_capacity < m_size + number_elements) {
+      reserve(m_size + number_elements);
+    }
+    pos = iterator(m_array + pos_index);
+
+    for (iterator it_first = pos, it_last = end() + number_elements - 1;
+         it_first != it_last; ++it_first, --it_last) {
+      *it_first = *it_last;
+    }
+    for (iterator runner = pos; runner != end(); ++runner, ++first) {
+      *runner = *first;
+    }
+    m_size += number_elements;
+    return pos;
+  }
+  /*!
+   * Inserts elements from "ilist" before position pointed by "pos".
+   * \param pos iterator pointing to the element past the position to insert.
+   * \param ilist initializer_list with elements to insert.
+   * \return iterator pointing to first element inserted, or "pos" if "ilist" is
+   *         empty.
+   */
+  iterator insert(iterator pos, std::initializer_list<T> ilist) {
+    if (m_capacity == 0) {
+      resize(ilist.size());
+    } else if (m_capacity < m_size + ilist.size()) {
+      resize(m_size + ilist.size());
+    }
+    pos = iterator(m_array + ilist.size());
+
+    for (iterator it_first = pos, it_last = end() + ilist.size() - 1;
+         it_first != it_last; ++it_first, --it_last) {
+      *it_last = *it_first;
+    }
+    for (auto ilist_runner = ilist.begin(); ilist_runner != ilist.end();
+         ++ilist_runner, ++pos) {
+      *pos = *ilist_runner;
+    }
+    m_size += ilist.size();
+    return pos - ilist.size();
+  }
+  /*!
+   * Removes the element pointed by "pos".
+   * \param pos iterator pointing to the element to remove.
+   * \return iterator pointing to the element past the removed one. Note, that
+   *         it can return end().
+   */
+  iterator erase(iterator pos) {
+    // TODO try to make it work with std::copy().
+    for (iterator it = pos + 1; it != end(); ++it) {
+      *(it - 1) = *it;
+    }
+    --m_size;
+    return pos;
+  }
+  /*!
+   * Removes the range of elements ["first", "last").
+   * \param first iterator pointing to the beginning of the range.
+   * \param last iterator pointing to the end of the range (not included).
+   * \return iterator pointing to the element past the removed one. Note, that
+   *         it can return end().
+   */
+  iterator erase(iterator first, iterator last) {
+    // TODO try to make it work with std::copy().
+    for (auto copy_it = last + 1, erase_it = first; erase_it != last;
+         ++erase_it, ++copy_it) {
+      *erase_it = *copy_it;
+    }
+    m_size -= std::distance(first, last);
+    return iterator(first);
+  }
+  /*!
+   * Changes the size of the container. If new_size > size, increases size
+   * of the container inserting copies of "value". If new_size < size, reduces
+   * the size of the container. Otherwise, do nothing.
+   * \param new_size new size of the container.
+   * \param value data to store in case on need. If not provided, default
+   *        constructor will be used.
+   */
+  void resize(size_type new_size, value_type value = value_type()) {
+    if (new_size > m_capacity) {
+      reserve(new_size);
+      for (size_type index{m_size}; m_size < new_size; ++index) {
+        m_array[index] = value_type();
+      }
+    }
+    m_size = new_size;
+  }
+  /*!
+   * Inserts a element in the end of the container.
+   * \param value data to store.
+   */
+  void push_back(value_type value) { insert(end(), value); }
+  /*!
+   * Inserts a element in the beginning of the container.
+   * \param value data to store.
+   */
+  void push_front(value_type value) { insert(begin(), value); }
+
   class iterator {
   public:
     /*!
