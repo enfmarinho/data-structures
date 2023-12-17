@@ -38,7 +38,11 @@ public:
    * Creates a vector with the same size and the same elements as the ilist.
    * \param ilist initializer_list with elements to insert in the vector.
    */
-  Vector(std::initializer_list<value_type> ilist) { return assign(ilist); }
+  Vector(std::initializer_list<value_type> ilist) {
+    for (auto it = ilist.begin(); it != ilist.end(); ++it) {
+      push_back(*it);
+    }
+  }
   /*!
    * Creates a vector with the data in the range [begin, end).
    * \param begin beginning of the range.
@@ -63,15 +67,10 @@ public:
    * Makes the vector equal to the ilist.
    * \param ilist initializer_list with elements to insert in the vector.
    */
-  Vector assing(std::initializer_list<value_type> ilist) {
-    m_size = min(m_size, ilist.size());
-    size_type index{0};
-    while (index < m_size) {
-      m_array[index] = ilist[index];
-      ++index;
-    }
-    for (; index < ilist.size(); ++index) {
-      push_back(ilist[index]);
+  Vector assign(std::initializer_list<value_type> ilist) {
+    clear();
+    for (auto it = ilist.begin(); it != ilist.end(); ++it) {
+      push_back(*it);
     }
     return *this;
   }
