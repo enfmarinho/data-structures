@@ -6,8 +6,9 @@
 
 // Namespace for sequential containers(sc).
 namespace sc {
-template <typename T> class Vector {
+template <typename T> class vector {
 public:
+  // Forward declaration.
   class iterator;
   //=== Aliases.
   using value_type = T;
@@ -25,7 +26,7 @@ public:
    * \param count number of elements to insert.
    * \param value data to store in the vector.
    */
-  Vector(size_type count = 0, value_type value = T()) {
+  vector(size_type count = 0, value_type value = T()) {
     if (count > 0) {
       m_size = count;
       m_array = new T[m_size];
@@ -38,7 +39,7 @@ public:
    * Creates a vector with the same size and the same elements as the ilist.
    * \param ilist initializer_list with elements to insert in the vector.
    */
-  Vector(std::initializer_list<value_type> ilist) {
+  vector(std::initializer_list<value_type> ilist) {
     for (auto it = ilist.begin(); it != ilist.end(); ++it) {
       push_back(*it);
     }
@@ -48,7 +49,7 @@ public:
    * \param begin beginning of the range.
    * \param end ending of the range (not included).
    */
-  template <typename InputIt> Vector(InputIt begin, InputIt end) {
+  template <typename InputIt> vector(InputIt begin, InputIt end) {
     assign(begin, end);
   }
   /*!
@@ -56,7 +57,7 @@ public:
    * \param begin beginning of the range.
    * \param end ending of the range (not included).
    */
-  template <typename InputIt> Vector assign(InputIt begin, InputIt end) {
+  template <typename InputIt> vector assign(InputIt begin, InputIt end) {
     reserve(std::distance(begin, end));
     m_size = std::distance(begin, end);
     for (size_type index{0}; begin != end; ++begin, ++index) {
@@ -67,7 +68,7 @@ public:
    * Makes the vector equal to the ilist.
    * \param ilist initializer_list with elements to insert in the vector.
    */
-  Vector assign(std::initializer_list<value_type> ilist) {
+  vector assign(std::initializer_list<value_type> ilist) {
     clear();
     for (auto it = ilist.begin(); it != ilist.end(); ++it) {
       push_back(*it);
@@ -78,11 +79,11 @@ public:
    * Makes the vector equal to the ilist.
    * \param ilist initializer_list with elements to insert in the vector.
    */
-  Vector operator=(std::initializer_list<value_type> ilist) {
+  vector operator=(std::initializer_list<value_type> ilist) {
     return assign(ilist);
   }
   /// Deallocates memory.
-  ~Vector() {
+  ~vector() {
     if (m_array != nullptr) {
       delete[] m_array;
     }
