@@ -18,7 +18,7 @@ public:
   using size_type = size_t;
   using difference_type = std::ptrdiff_t;
 
-  //=== [I] Members Functions
+  //=== [I] Special Functions
   /*!
    * Default constructor. Creates a vector with "count" copies of "value".
    * In case no parameters are provided, the vector will be created empty.
