@@ -220,22 +220,20 @@ public:
    */
   iterator insert(iterator pos, size_type count, const_reference value) {
     size_type pos_index = std::distance(m_array, &pos);
-    if (m_capacity == 0) {
-      reserve(count);
-    } else if (m_capacity < m_size + count) {
+    if (m_capacity < m_size + count) {
       reserve(m_size + count);
     }
     pos = iterator(m_array + pos_index);
 
     // TODO try to make it work with copy_backward.
-    for (iterator it_first = pos, it_last = end() + count - 1;
-         it_first != end(); ++it_first, --it_last) {
-      *it_last = *it_first;
+    for (iterator it_origin = end() - 1, it_destiny = end() + count - 1;
+         it_origin != pos - 1; --it_origin, --it_destiny) {
+      *it_destiny = *it_origin;
     }
-    m_size += count;
-    for (auto runner = pos; runner != end(); ++runner) {
+    for (auto runner = pos; runner != pos + count; ++runner) {
       *runner = value;
     }
+    m_size += count;
     return pos;
   }
   /*!
@@ -246,21 +244,20 @@ public:
    * \return iterator pointing to the first element inserted, or "pos" if
    * "first" == "last".
    */
-  // TODO fix this.
   template <class InputIt>
   iterator insert(iterator pos, InputIt first, InputIt last) {
     size_type pos_index = std::distance(m_array, &pos);
     size_type number_elements = std::distance(first, last);
-    if (m_capacity == 0) {
-      reserve(number_elements);
-    } else if (m_capacity < m_size + number_elements) {
+    if (m_capacity < m_size + number_elements) {
       reserve(m_size + number_elements);
     }
     pos = iterator(m_array + pos_index);
 
-    for (iterator it_first = pos, it_last = end() + number_elements - 1;
-         it_first != it_last; ++it_first, --it_last) {
-      *it_first = *it_last;
+    // TODO try to make it work with copy_backward.
+    for (iterator it_origin = end() - 1,
+                  it_destiny = end() + number_elements - 1;
+         it_origin != pos - 1; --it_origin, --it_destiny) {
+      *it_destiny = *it_origin;
     }
     for (iterator runner = pos; first != last; ++runner, ++first) {
       *runner = *first;
@@ -275,21 +272,20 @@ public:
    * \return iterator pointing to first element inserted, or "pos" if "ilist" is
    *         empty.
    */
-  // TODO fix this
   iterator insert(iterator pos, std::initializer_list<T> ilist) {
-    if (m_capacity == 0) {
-      resize(ilist.size());
-    } else if (m_capacity < m_size + ilist.size()) {
-      resize(m_size + ilist.size());
+    size_type pos_index = std::distance(m_array, &pos);
+    if (m_capacity < m_size + ilist.size()) {
+      reserve(m_size + ilist.size());
     }
-    pos = iterator(m_array + ilist.size());
+    pos = iterator(m_array + pos_index);
 
-    for (iterator it_first = pos, it_last = end() + ilist.size() - 1;
-         it_first != it_last; ++it_first, --it_last) {
-      *it_last = *it_first;
+    // TODO try to make it work with copy_backward.
+    for (iterator it_origin = end() - 1, it_destiny = end() + ilist.size() - 1;
+         it_origin != pos - 1; --it_origin, --it_destiny) {
+      *it_destiny = *it_origin;
     }
     for (auto ilist_runner = ilist.begin(); ilist_runner != ilist.end();
-         ++ilist_runner, --pos) {
+         ++ilist_runner, ++pos) {
       *pos = *ilist_runner;
     }
     m_size += ilist.size();
