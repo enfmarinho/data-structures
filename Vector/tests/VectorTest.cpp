@@ -209,6 +209,52 @@ TEST(Iterators, DifferenceOperator) {
   EXPECT_TRUE(list1.begin() != list1.begin() + 1);
   EXPECT_TRUE(list1.end() != list1.end() + 1);
 }
+
+TEST(Capacity, empty) {
+  lib::vector<int> list1{1, 2, 3};
+  EXPECT_FALSE(list1.empty());
+  list1.clear();
+  EXPECT_TRUE(list1.empty());
+  lib::vector<int> list2;
+  EXPECT_TRUE(list2.empty());
+}
+
+TEST(Capacity, size) {
+  lib::vector<int> list1;
+  EXPECT_EQ(list1.size(), 0);
+}
+
+TEST(Capacity, reserve) {
+  lib::vector<int> list1;
+  EXPECT_EQ(list1.capacity(), 0);
+  for (int counter{1}; counter <= 8; counter *= 2) {
+    list1.reserve(counter);
+    EXPECT_EQ(list1.capacity(), counter);
+  }
+  list1.reserve(0);
+  EXPECT_EQ(list1.capacity(), 8);
+}
+
+TEST(Capacity, capacity) {
+  lib::vector<int> list1;
+  EXPECT_EQ(list1.capacity(), 0);
+  list1.reserve(6);
+  EXPECT_EQ(list1.capacity(), 6);
+  list1.reserve(3);
+  EXPECT_EQ(list1.capacity(), 6);
+  list1.reserve(8);
+  EXPECT_EQ(list1.capacity(), 8);
+}
+
+TEST(Capacity, shrink_to_fit) {
+  lib::vector<int> list1{1, 2, 3, 4, 5, 6, 7, 8, 9};
+  EXPECT_EQ(list1.capacity(), 9);
+  list1.shrink_to_fit();
+  EXPECT_EQ(list1.capacity(), 9);
+  list1.resize(6);
+  list1.shrink_to_fit();
+  EXPECT_EQ(list1.capacity(), 6);
+}
 int main(int argc, char *argv[]) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
