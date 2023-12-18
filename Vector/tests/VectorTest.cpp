@@ -6,9 +6,9 @@
 /*
  * The "lib" macro can be used to select which lib to test. To ensure the
  * integrity of the tests, the "std" namespace must be used, to effectively test
- * the vector developed the "sc" namespace must be used. Note: some tests, such
- * as push_front, does not use the "lib" macro, because they are not defined in
- * "std", instead the namespace "sc" is used directly.
+ * the vector developed the "sc" namespace must be used. Note: the test for the
+ * function "push_front" does not use the "lib" macro, because it is not defined
+ * in "std", instead the namespace "sc" is used directly.
  */
 #define lib sc
 // #define lib std
@@ -77,6 +77,50 @@ TEST(SpecialFunctions, RangeConstructor) {
   EXPECT_FALSE(list1.empty());
   EXPECT_EQ(list1.size(), 5);
   EXPECT_EQ(list1.capacity(), 5);
+}
+
+TEST(ElementAccess, front) {
+  lib::vector<int> list1{100, 200, 300, 400};
+  EXPECT_EQ(list1.front(), 100);
+  list1.front() = 900;
+  EXPECT_EQ(list1.front(), 900);
+
+  const lib::vector<int> list2{1, 2, 4, 8, 16};
+  EXPECT_EQ(list2.front(), 1);
+}
+
+TEST(ElementAccess, back) {
+  lib::vector<int> list1{1, 2, 3, 4, 5};
+  EXPECT_EQ(list1.back(), 5);
+  list1.back() = 10;
+  EXPECT_EQ(list1.back(), 10);
+
+  const lib::vector<int> list2{1, 2, 3, 4, 5};
+  EXPECT_EQ(list2.back(), 5);
+}
+
+TEST(ElementAccess, data) {
+  lib::vector<int> list1{1, 2, 3, 4, 5};
+  EXPECT_EQ(list1.front(), 1);
+  *list1.data() = 100;
+  EXPECT_EQ(list1.front(), 100);
+}
+
+TEST(ElementAccess, at) {
+  lib::vector<int> list1{1, 2, 3, 4, 5};
+  for (int index{0}; index < 5; ++index) {
+    EXPECT_EQ(list1.at(index), index + 1);
+  }
+  for (int index{0}; index < 5; ++index) {
+    EXPECT_EQ(list1[index], index + 1);
+  }
+  list1.at(0) = 99;
+  EXPECT_EQ(list1.at(0), 99);
+  list1[1] = 100;
+  EXPECT_EQ(list1[1], 100);
+
+  const lib::vector<int> list2{1, 2, 3, 4, 5};
+  EXPECT_EQ(list2[1], 2);
 }
 int main(int argc, char *argv[]) {
   testing::InitGoogleTest(&argc, argv);
