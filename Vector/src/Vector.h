@@ -29,6 +29,7 @@ public:
   vector(size_type count = 0, value_type value = T()) {
     if (count > 0) {
       m_size = count;
+      m_capacity = count;
       m_array = new T[m_size];
       for (size_type index{0}; index < m_size; ++index) {
         m_array[index] = value;
@@ -40,8 +41,20 @@ public:
    * \param ilist initializer_list with elements to insert in the vector.
    */
   vector(std::initializer_list<value_type> ilist) {
+    reserve(ilist.size());
     for (auto it = ilist.begin(); it != ilist.end(); ++it) {
       push_back(*it);
+    }
+  }
+  /*!
+   * Copy constructor. Creates a vector equivalent to "copy".
+   * \param copy vector to be copied.
+   */
+  vector(const vector &copy) {
+    reserve(copy.m_capacity);
+    m_size = copy.m_size;
+    for (int index{0}; index < m_size; ++index) {
+      m_array[index] = copy.m_array[index];
     }
   }
   /*!
@@ -57,30 +70,33 @@ public:
    * \param begin beginning of the range.
    * \param end ending of the range (not included).
    */
-  template <typename InputIt> vector assign(InputIt begin, InputIt end) {
+  template <typename InputIt> void assign(InputIt begin, InputIt end) {
+    clear();
     reserve(std::distance(begin, end));
-    m_size = std::distance(begin, end);
+    // m_size = std::distance(begin, end);
     for (size_type index{0}; begin != end; ++begin, ++index) {
-      m_array[index] = *begin;
+      // m_array[index] = *begin;
+      push_back(*begin);
     }
   }
   /*!
    * Makes the vector equal to the ilist.
    * \param ilist initializer_list with elements to insert in the vector.
    */
-  vector assign(std::initializer_list<value_type> ilist) {
+  void assign(std::initializer_list<value_type> ilist) {
     clear();
+    reserve(ilist.size());
     for (auto it = ilist.begin(); it != ilist.end(); ++it) {
       push_back(*it);
     }
-    return *this;
   }
   /*!
    * Makes the vector equal to the ilist.
    * \param ilist initializer_list with elements to insert in the vector.
    */
   vector operator=(std::initializer_list<value_type> ilist) {
-    return assign(ilist);
+    assign(ilist);
+    return *this;
   }
   /// Deallocates memory.
   ~vector() {
@@ -128,7 +144,7 @@ public:
   bool empty() const { return m_size == 0; }
   /// Consults the number of elements in the container.
   size_type size() const { return m_size; }
-  /*!\
+  /*!
    * If new_capacity is greater than the current capacity of the container, the
    * capacity if increased to new_capacity, otherwise the function does nothing.
    * \param new_capacity capacity that the container should have.
@@ -140,7 +156,9 @@ public:
       for (size_type index{0}; index < m_size; ++index) {
         tmp[index] = m_array[index];
       }
-      delete[] m_array;
+      if (m_array != nullptr) {
+        delete[] m_array;
+      }
       m_array = tmp;
     }
   }
@@ -193,6 +211,7 @@ public:
   }
   /*!
    * Inserts "count" copies of "value" before position pointed by "pos".
+   * Note: be careful to avoid ambiguity with the range insert function.
    * \param pos iterator pointing to the element past the position to insert.
    * \param count number of copies to insert.
    * \param value data to insert.
@@ -213,19 +232,21 @@ public:
          it_first != end(); ++it_first, --it_last) {
       *it_last = *it_first;
     }
+    m_size += count;
     for (auto runner = pos; runner != end(); ++runner) {
       *runner = value;
     }
-    m_size += count;
     return pos;
   }
   /*!
    * Inserts elements in range [first, last) before position pointed by "pos".
-   * \param first beginning of the range of elements..
+   * Note: be careful to avoid ambiguity with the copy insert function.
+   * \param first beginning of the range of elements.
    * \param last end of the range of elements.
    * \return iterator pointing to the first element inserted, or "pos" if
-   *         "first" == "last".
+   * "first" == "last".
    */
+  // TODO fix this.
   template <class InputIt>
   iterator insert(iterator pos, InputIt first, InputIt last) {
     size_type pos_index = std::distance(m_array, &pos);
@@ -241,7 +262,7 @@ public:
          it_first != it_last; ++it_first, --it_last) {
       *it_first = *it_last;
     }
-    for (iterator runner = pos; runner != end(); ++runner, ++first) {
+    for (iterator runner = pos; first != last; ++runner, ++first) {
       *runner = *first;
     }
     m_size += number_elements;
@@ -254,6 +275,7 @@ public:
    * \return iterator pointing to first element inserted, or "pos" if "ilist" is
    *         empty.
    */
+  // TODO fix this
   iterator insert(iterator pos, std::initializer_list<T> ilist) {
     if (m_capacity == 0) {
       resize(ilist.size());
@@ -267,7 +289,7 @@ public:
       *it_last = *it_first;
     }
     for (auto ilist_runner = ilist.begin(); ilist_runner != ilist.end();
-         ++ilist_runner, ++pos) {
+         ++ilist_runner, --pos) {
       *pos = *ilist_runner;
     }
     m_size += ilist.size();
@@ -300,7 +322,7 @@ public:
          ++erase_it, ++copy_it) {
       *erase_it = *copy_it;
     }
-    m_size -= std::distance(first, last);
+    m_size -= last - first;
     return iterator(first);
   }
   /*!
@@ -314,7 +336,7 @@ public:
   void resize(size_type new_size, value_type value = value_type()) {
     if (new_size > m_capacity) {
       reserve(new_size);
-      for (size_type index{m_size}; m_size < new_size; ++index) {
+      for (size_type index{m_size}; index < new_size; ++index) {
         m_array[index] = value_type();
       }
     }
@@ -423,12 +445,10 @@ public:
   };
 
 private:
-  pointer m_array{nullptr};
-  size_type m_size{0};
-  size_type m_capacity{0};
+  pointer m_array{nullptr}; //!< Pointer to the beginning of the container.
+  size_type m_size{0};      //!< Number of elements in the container.
+  size_type m_capacity{0};  //!< Capacity of the container.
 };
 } // namespace sc
-  //
-#include "incl.h"
 
 #endif // VECTOR_H

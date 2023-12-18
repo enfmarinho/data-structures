@@ -294,27 +294,43 @@ TEST(Modifiers, InsertCopies) {
       EXPECT_EQ(list1[index], 22);
     }
   }
+  list1.insert(list1.begin(), (size_t)6, 11);
+  EXPECT_EQ(list1.size(), 17);
+  for (int index{0}; index < list1.size(); ++index) {
+    if (index < 6) {
+      EXPECT_EQ(list1[index], 11);
+    } else if (index < 11) {
+      EXPECT_EQ(list1[index], 99);
+    } else {
+      EXPECT_EQ(list1[index], 22);
+    }
+  }
 }
 
 TEST(Modifiers, InsertRange) {
-  int array[] = {1, 2, 3, 4, 5};
+  int array[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
   lib::vector<int> list1;
-  list1.insert(list1.end(), array, array + 5);
-  EXPECT_EQ(list1.size(), 5);
-  for (int index{0}; index < 5; ++index) {
+  list1.insert(list1.end(), array, array + 9);
+  EXPECT_EQ(list1.size(), 9);
+  for (int index{0}; index < list1.size(); ++index) {
     EXPECT_EQ(list1[index], index + 1);
   }
   list1.clear();
-  list1.insert(list1.end(), array, array + 3);
+  list1.insert(list1.end(), array + 3, array + 6);
   EXPECT_EQ(list1.size(), 3);
-  for (int index{0}; index < 3; ++index) {
+  for (int index{0}; index < list1.size(); ++index) {
+    EXPECT_EQ(list1[index], index + 4);
+  }
+  list1.insert(list1.begin(), array, array + 3);
+  EXPECT_EQ(list1.size(), 6);
+  for (int index{0}; index < list1.size(); ++index) {
     EXPECT_EQ(list1[index], index + 1);
   }
-  list1.insert(list1.end(), array + 3, array + 5);
-  for (int index{0}; index < 5; ++index) {
+  list1.insert(list1.end(), array + 6, array + 9);
+  EXPECT_EQ(list1.size(), 9);
+  for (int index{0}; index < list1.size(); ++index) {
     EXPECT_EQ(list1[index], index + 1);
   }
-  EXPECT_EQ(list1.size(), 5);
 }
 
 TEST(Modifiers, InsertInitializerList) {
