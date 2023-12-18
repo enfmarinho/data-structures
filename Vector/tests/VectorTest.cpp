@@ -122,6 +122,93 @@ TEST(ElementAccess, at) {
   const lib::vector<int> list2{1, 2, 3, 4, 5};
   EXPECT_EQ(list2[1], 2);
 }
+
+TEST(Iterators, begin) {
+  lib::vector<int> list1{1, 2, 3, 4, 5, 6};
+  EXPECT_EQ(*list1.begin(), 1);
+  *list1.begin() = 99;
+  EXPECT_EQ(*list1.begin(), 99);
+}
+
+TEST(Iterators, end) {
+  lib::vector<int> list1{1, 2, 3, 4, 5, 6};
+  EXPECT_EQ(*(list1.end() - 1), 6);
+  int expected{1};
+  for (auto value : list1) {
+    EXPECT_EQ(value, expected++);
+  }
+}
+
+TEST(Iterators, Increment) {
+  lib::vector<int> list1{1, 2, 3, 4, 5};
+  int expected{1};
+  for (auto it = list1.begin(); it != list1.end(); ++it, ++expected) {
+    EXPECT_EQ(*it, expected);
+  }
+  expected = 1;
+  for (auto it = list1.begin(); it != list1.end(); it++, ++expected) {
+    EXPECT_EQ(*it, expected);
+  }
+  EXPECT_EQ(*(list1.begin() + 3), 4);
+  EXPECT_EQ(*(2 + list1.begin()), 3);
+  *(2 + list1.begin()) = 100;
+  EXPECT_EQ(*(2 + list1.begin()), 100);
+}
+
+TEST(Iterators, Decrement) {
+  lib::vector<int> list1{1, 2, 3, 4, 5};
+  int expected{5};
+  for (auto it = list1.end() - 1; it != list1.begin(); --it, --expected) {
+    EXPECT_EQ(*it, expected);
+  }
+  expected = 5;
+  for (auto it = list1.end() - 1; it != list1.begin(); it--, --expected) {
+    EXPECT_EQ(*it, expected);
+  }
+  EXPECT_EQ(*(list1.end() - 2), 4);
+  *(list1.end() - 2) = 99;
+  EXPECT_EQ(*(list1.end() - 2), 99);
+}
+
+TEST(Iterators, Difference) {
+  lib::vector<int> list1{1, 2, 3};
+  EXPECT_EQ((list1.end() - list1.begin()), list1.size());
+}
+
+TEST(Iterators, ArrowOperator) {
+  lib::vector<std::vector<int>> list1;
+  list1.push_back(std::vector<int>());
+  EXPECT_FALSE(list1.empty());
+  EXPECT_TRUE(list1.begin()->empty());
+  list1.begin()->push_back(5);
+  EXPECT_EQ(list1.begin()->front(), 5);
+}
+
+TEST(Iterators, EqualOperator) {
+  lib::vector<int> list1{1, 2, 3};
+  auto it = list1.begin();
+  EXPECT_EQ(*it, 1);
+  auto it2 = it;
+  *it2 = 99;
+  EXPECT_EQ(*it2, 99);
+}
+
+TEST(Iterators, EquivalentOperator) {
+  lib::vector<int> list1{100, 200, 300};
+  EXPECT_TRUE(list1.begin() == list1.begin());
+  EXPECT_TRUE(list1.end() == list1.end());
+  EXPECT_FALSE(list1.begin() == list1.end());
+  EXPECT_FALSE(list1.begin() == list1.begin() + 1);
+}
+
+TEST(Iterators, DifferenceOperator) {
+  lib::vector<int> list1{1, 2, 3};
+  EXPECT_FALSE(list1.begin() != list1.begin());
+  EXPECT_FALSE(list1.end() != list1.end());
+  EXPECT_TRUE(list1.begin() != list1.end());
+  EXPECT_TRUE(list1.begin() != list1.begin() + 1);
+  EXPECT_TRUE(list1.end() != list1.end() + 1);
+}
 int main(int argc, char *argv[]) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
