@@ -255,6 +255,141 @@ TEST(Capacity, shrink_to_fit) {
   list1.shrink_to_fit();
   EXPECT_EQ(list1.capacity(), 6);
 }
+
+TEST(Modifiers, clear) {
+  lib::vector<int> list1{1, 2, 3};
+  EXPECT_FALSE(list1.begin() == list1.end());
+  EXPECT_EQ(list1.size(), 3);
+  list1.clear();
+  EXPECT_TRUE(list1.begin() == list1.end());
+  EXPECT_EQ(list1.size(), 0);
+}
+
+TEST(Modifiers, InsertValue) {
+  lib::vector<int> list1;
+  for (int counter{0}; counter < 10; ++counter) {
+    EXPECT_EQ(list1.size(), counter);
+    list1.insert(list1.end(), counter);
+    EXPECT_EQ(list1.back(), counter);
+  }
+  EXPECT_EQ(list1.size(), 10);
+  list1.insert(list1.begin(), 99);
+  EXPECT_EQ(list1.front(), 99);
+  EXPECT_EQ(list1.size(), 11);
+}
+
+TEST(Modifiers, InsertCopies) {
+  lib::vector<int> list1;
+  list1.insert(list1.begin(), (size_t)5, 99);
+  EXPECT_EQ(list1.size(), 5);
+  for (auto v : list1) {
+    EXPECT_EQ(v, 99);
+  }
+  list1.insert(list1.end(), (size_t)6, 22);
+  EXPECT_EQ(list1.size(), 11);
+  for (int index{0}; index < list1.size(); ++index) {
+    if (index < 5) {
+      EXPECT_EQ(list1[index], 99);
+    } else {
+      EXPECT_EQ(list1[index], 22);
+    }
+  }
+}
+
+TEST(Modifiers, InsertRange) {
+  int array[] = {1, 2, 3, 4, 5};
+  lib::vector<int> list1;
+  list1.insert(list1.end(), array, array + 5);
+  EXPECT_EQ(list1.size(), 5);
+  for (int index{0}; index < 5; ++index) {
+    EXPECT_EQ(list1[index], index + 1);
+  }
+  list1.clear();
+  list1.insert(list1.end(), array, array + 3);
+  EXPECT_EQ(list1.size(), 3);
+  for (int index{0}; index < 3; ++index) {
+    EXPECT_EQ(list1[index], index + 1);
+  }
+  list1.insert(list1.end(), array + 3, array + 5);
+  for (int index{0}; index < 5; ++index) {
+    EXPECT_EQ(list1[index], index + 1);
+  }
+  EXPECT_EQ(list1.size(), 5);
+}
+
+TEST(Modifiers, InsertInitializerList) {
+  std::initializer_list<int> ilist1 = {1, 2, 3};
+  std::initializer_list<int> ilist2 = {4, 5, 6};
+  std::initializer_list<int> ilist3 = {7, 8, 9};
+  lib::vector<int> list1;
+  list1.insert(list1.end(), ilist2);
+  EXPECT_EQ(list1.size(), 3);
+  for (int index{0}; index < list1.size(); ++index) {
+    EXPECT_EQ(list1[index], index + 4);
+  }
+  list1.insert(list1.end(), ilist3);
+  EXPECT_EQ(list1.size(), 6);
+  for (int index{0}; index < list1.size(); ++index) {
+    EXPECT_EQ(list1[index], index + 4);
+  }
+  list1.insert(list1.begin(), ilist1);
+  EXPECT_EQ(list1.size(), 9);
+  for (int index{0}; index < list1.size(); ++index) {
+    EXPECT_EQ(list1[index], index + 1);
+  }
+}
+
+TEST(Modifiers, EraseValue) {
+  lib::vector<int> list1{1, 2, 3, 4, 5};
+  int counter{5}, expected{1};
+  while (list1.size() > 0) {
+    EXPECT_EQ(list1.size(), counter--);
+    EXPECT_EQ(*list1.begin(), expected++);
+    list1.erase(list1.begin());
+  }
+}
+
+TEST(Modifiers, EraseRange) {
+  lib::vector<int> list1{1, 2, 3};
+  EXPECT_EQ(list1.size(), 3);
+  list1.erase(list1.begin(), list1.end());
+  EXPECT_EQ(list1.size(), 0);
+
+  lib::vector<int> list2{1, 2, 3, 4, 5, 6, 7, 8, 9};
+  EXPECT_EQ(list2.size(), 9);
+  list2.erase(list2.begin(), list2.begin() + 3);
+  EXPECT_EQ(list2.size(), 6);
+}
+
+TEST(Modifiers, resize) {
+  lib::vector<int> list1;
+  EXPECT_EQ(list1.size(), 0);
+  for (int counter{1}; counter < 9; counter *= 2) {
+    list1.resize(counter);
+    EXPECT_EQ(list1.size(), counter);
+  }
+  list1.resize(3);
+  EXPECT_EQ(list1.size(), 3);
+}
+
+TEST(Modifiers, push_back) {
+  lib::vector<int> list1;
+  for (int counter{0}; counter < 5; ++counter) {
+    EXPECT_EQ(list1.size(), counter);
+    list1.push_back(counter);
+    EXPECT_EQ(*(--list1.end()), counter);
+  }
+}
+
+TEST(Modifiers, push_front) {
+  sc::vector<int> list1;
+  for (int counter{0}; counter < 5; ++counter) {
+    EXPECT_EQ(list1.size(), counter);
+    list1.push_front(counter);
+    EXPECT_EQ(*(list1.begin()), counter);
+  }
+}
+
 int main(int argc, char *argv[]) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
