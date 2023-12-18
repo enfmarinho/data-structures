@@ -333,11 +333,22 @@ public:
 
   class iterator {
   public:
+    //=== Aliases.
+    using value_type = T;
+    using pointer = value_type *;
+    using const_pointer = const value_type *;
+    using reference = value_type &;
+    using const_reference = const value_type &;
+    using size_type = size_t;
+    using difference_type = std::ptrdiff_t;
+
+    // Deleting default constructor.
+    iterator() = delete;
     /*!
      * Constructs the iterator.
      * \param pointer to a value in the container.
      */
-    iterator(pointer pointer = nullptr) { m_pointer = pointer; }
+    iterator(pointer pointer) { m_pointer = pointer; }
     /// Default copy constructor.
     iterator(const iterator &copy) = default;
     /// Default destructor.
@@ -346,6 +357,10 @@ public:
     reference operator*() { return *m_pointer; }
     /// Constant dereference operator.
     const_reference operator*() const { return *m_pointer; }
+    /// Consults the underlying pointer of the iterator.
+    pointer operator&() { return m_pointer; }
+    /// Consults the underlying pointer of the iterator.
+    const_pointer operator&() const { return m_pointer; }
     /// Arrow operator.
     pointer operator->() const { return m_pointer; }
     /// Pre-increment.
@@ -359,6 +374,14 @@ public:
       ++m_pointer;
       return iterator(copy);
     }
+    /// Increment operator.
+    friend iterator operator+(iterator it, int increment) {
+      return iterator(&it + increment);
+    }
+    /// Increment operator.
+    friend iterator operator+(int increment, iterator it) {
+      return iterator(&it + increment);
+    }
     /// Pre-decrement.
     iterator operator--() {
       --m_pointer;
@@ -370,17 +393,27 @@ public:
       --m_pointer;
       return iterator(copy);
     }
+    /// Decrement operator.
+    friend iterator operator-(iterator it, int decrement) {
+      return iterator(&it - decrement);
+    }
+    /// Difference operator.
+    friend size_type operator-(iterator left, iterator right) {
+      return left.m_pointer - right.m_pointer;
+    }
     /*!
-     * Checks whether two iterators are different.
-     * \return flag that indicates whether iterator are different.
+     * Makes this be equal to the iterator "copy".
+     * \param copy iterator to copy the data from.
      */
+    iterator operator=(const iterator &copy) {
+      m_pointer = copy.m_pointer;
+      return copy;
+    }
+    /// Checks whether two iterator are different.
     bool operator!=(const iterator &right) {
       return m_pointer != right.m_pointer;
     }
-    /*!
-     * Checks whether two iterator are equal.
-     * \return flag that indicates whether iterator are equal.
-     */
+    /// Checks whether two iterator are equal.
     bool operator==(const iterator &right) {
       return m_pointer == right.m_pointer;
     }
