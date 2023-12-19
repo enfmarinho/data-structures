@@ -73,7 +73,6 @@ public:
   template <typename InputIt> void assign(InputIt begin, InputIt end) {
     clear();
     reserve(std::distance(begin, end));
-    // m_size = std::distance(begin, end);
     for (size_type index{0}; begin != end; ++begin, ++index) {
       // m_array[index] = *begin;
       push_back(*begin);
@@ -194,12 +193,9 @@ public:
     size_type pos_index = std::distance(m_array, &pos);
     if (m_capacity == 0) {
       reserve(1);
-      pos_index = 0;
     } else if (m_size == m_capacity) {
       reserve(2 * m_size);
     }
-    // std::copy_backward(pos, end(), --end()); // Compiler does not recognize
-    // value_type.
     pos = iterator(m_array + pos_index);
     for (iterator it_first = pos, it_last = end(); it_first != end();
          ++it_first, --it_last) {
@@ -225,7 +221,6 @@ public:
     }
     pos = iterator(m_array + pos_index);
 
-    // TODO try to make it work with copy_backward.
     for (iterator it_origin = end() - 1, it_destiny = end() + count - 1;
          it_origin != pos - 1; --it_origin, --it_destiny) {
       *it_destiny = *it_origin;
@@ -253,7 +248,6 @@ public:
     }
     pos = iterator(m_array + pos_index);
 
-    // TODO try to make it work with copy_backward.
     for (iterator it_origin = end() - 1,
                   it_destiny = end() + number_elements - 1;
          it_origin != pos - 1; --it_origin, --it_destiny) {
@@ -279,7 +273,6 @@ public:
     }
     pos = iterator(m_array + pos_index);
 
-    // TODO try to make it work with copy_backward.
     for (iterator it_origin = end() - 1, it_destiny = end() + ilist.size() - 1;
          it_origin != pos - 1; --it_origin, --it_destiny) {
       *it_destiny = *it_origin;
@@ -298,7 +291,6 @@ public:
    *         it can return end().
    */
   iterator erase(iterator pos) {
-    // TODO try to make it work with std::copy().
     for (iterator it = pos + 1; it != end(); ++it) {
       *(it - 1) = *it;
     }
@@ -313,7 +305,6 @@ public:
    *         it can return end().
    */
   iterator erase(iterator first, iterator last) {
-    // TODO try to make it work with std::copy().
     for (auto copy_it = last + 1, erase_it = first; erase_it != last;
          ++erase_it, ++copy_it) {
       *erase_it = *copy_it;
