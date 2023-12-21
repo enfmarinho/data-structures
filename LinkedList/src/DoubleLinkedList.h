@@ -141,6 +141,11 @@ public:
   }
 
   ///=== [II] Element Access.
+  reference front() { return m_head->next->data; };
+  const_reference front() const { return m_head->next->data; };
+  reference back() { return m_tail->previous->data; };
+  const_reference back() const { return m_tail->previous->data; };
+
   ///=== [III] Iterators.
   ///=== [IV] Capacity.
   ///=== [V] Modifiers.
