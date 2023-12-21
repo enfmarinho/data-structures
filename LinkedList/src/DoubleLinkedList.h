@@ -38,6 +38,108 @@ public:
   };
 
   ///=== [I] Special Functions.
+  list(size_type count = 0, const_reference value = value_type()) {
+    initialize();
+    assign(count, value);
+  }
+  template <typename InputIt> list(InputIt first, InputIt last) {
+    initialize();
+    assign(first, last);
+  }
+  list(list &other) {
+    initialize();
+    assign(other);
+  }
+  list(list &&other) {
+    initialize();
+    assign(std::move(other));
+  }
+  list(std::initializer_list<value_type> ilist) {
+    initialize();
+    for (auto runner = ilist.begin(); runner != ilist.end(); ++runner) {
+      push_back(*runner);
+    }
+  }
+  ~list() {
+    clear();
+    delete m_head;
+    delete m_tail;
+  }
+  list_reference operator=(list &other) {
+    assign(other);
+    return other;
+  }
+  list_reference operator=(list &&other) {
+    assign(other);
+    return *this;
+  }
+  list_reference operator=(std::initializer_list<value_type> ilist) {
+    assign(ilist);
+    return *this;
+  }
+  void assign(list &other) {
+    clear();
+    for (auto v : other) {
+      push_back(v);
+    }
+  }
+  void assign(list &&other) {
+    clear();
+    m_head->next = other.m_head->next;
+    m_tail->previous = other.m_tail->previous;
+    m_head->next->previous = m_head;
+    m_tail->previous->next = m_tail;
+    m_size = other.m_size;
+    other.reset_controls();
+  }
+  void assign(size_type count, const_reference value = value_type()) {
+    iterator list_runner = begin();
+    size_type counter{0};
+    for (; m_size > 0 and counter < count; --m_size, ++list_runner, ++counter) {
+      *list_runner = value;
+    }
+    erase(list_runner, end());
+    for (; counter < count; ++counter) {
+      push_back(value);
+    }
+    m_size = count;
+  }
+  template <typename InputIt> void assign(InputIt first, InputIt last) {
+    // TODO optimize this. Make use of existing nodes.
+    clear();
+    for (; first != last; ++first) {
+      push_back(*first);
+    }
+    // auto list_runner = begin();
+    // size_type new_size = std::distance(first, last);
+    // for (; m_size > 0 and first != last; --m_size, ++first) {
+    //   *list_runner = *first;
+    // }
+    // erase(list_runner, end());
+    // for (; first != last; ++first) {
+    //   push_back(*first);
+    // }
+    // m_size = new_size;
+  }
+  void assign(std::initializer_list<value_type> ilist) {
+    // TODO optimize this. Make use of existing nodes.
+    clear();
+    for (auto v : ilist) {
+      push_back(v);
+    }
+    // iterator runner = begin();
+    // auto ilist_runner = ilist.begin();
+    // for (; m_size-- and ilist_runner != ilist.end(); ++runner,
+    // ++ilist_runner) {
+    //   (*runner) = *ilist_runner;
+    // }
+    // erase(runner, end());
+    // for (; ilist_runner != ilist.end(); ++ilist_runner) {
+    //   push_back(*ilist_runner);
+    // }
+    // m_size = ilist.size();
+  }
+
   ///=== [II] Element Access.
   ///=== [III] Iterators.
   ///=== [IV] Capacity.
@@ -132,6 +234,18 @@ public:
   };
 
 private:
+  /// Initializes data members.
+  void initialize() {
+    m_head = new Node;
+    m_tail = new Node(value_type(), nullptr, m_head);
+    m_head->next = m_tail;
+  }
+  /// Reset control data members.
+  void reset_controls() {
+    m_size = 0;
+    m_head->next = m_tail;
+    m_tail->previous = m_head;
+  }
   node_pointer m_head; //!< Pointer to the head node.
   node_pointer m_tail; //!< Pointer to the tail node.
   size_type m_size{0}; //!< Number of elements in the list.
