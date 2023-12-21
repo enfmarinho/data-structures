@@ -665,6 +665,13 @@ TEST(Operations, sort) {
   EXPECT_TRUE(check(list3, std::less()));
 }
 
+TEST(Operations, EquivalentOperator) {
+  lib::list<int> list1{1, 2, 3}, list2{1, 2, 3}, list3{1, 4, 5}, list4{1, 2};
+  EXPECT_TRUE(list1 == list1);
+  EXPECT_FALSE(list1 == list3);
+  EXPECT_FALSE(list1 == list4);
+}
+
 int main(int argc, char *argv[]) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
