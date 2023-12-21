@@ -49,6 +49,141 @@ TEST(Iterator, end) {
     ASSERT_EQ(v, ++counter);
   }
 }
+
+TEST(SpecialFunctions, DefaultConstructor) {
+  lib::list<int> list1;
+  ASSERT_TRUE(list1.empty());
+  ASSERT_EQ(list1.size(), 0);
+
+  lib::list<char> list2(4);
+  ASSERT_FALSE(list2.empty());
+  ASSERT_EQ(list2.size(), 4);
+  for (auto v : list2) {
+    ASSERT_EQ(v, char());
+  }
+
+  lib::list<std::string> list3(9, "exemple");
+  ASSERT_FALSE(list3.empty());
+  ASSERT_EQ(list3.size(), 9);
+  for (auto v : list3) {
+    EXPECT_EQ(v, "exemple");
+  }
+}
+
+TEST(SpecialFunctions, CopyAssign) {
+  lib::list<int> list1{1, 2, 3}, list2, list3;
+  list2 = list1;
+  ASSERT_EQ(list2.size(), list1.size());
+  int counter{0};
+  for (auto v : list2) {
+    ASSERT_EQ(v, ++counter);
+  }
+
+  list2 = list3;
+  ASSERT_EQ(list2.size(), list3.size());
+
+  list2 = list3 = list1;
+  counter = 0;
+  ASSERT_EQ(list2.size(), 3);
+  for (auto v : list2) {
+    ASSERT_EQ(v, ++counter);
+  }
+
+  ASSERT_EQ(list3.size(), 3);
+  counter = 0;
+  for (auto v : list3) {
+    ASSERT_EQ(v, ++counter);
+  }
+}
+
+TEST(SpecialFunctions, InitializerListAssign) {
+  std::initializer_list<int> ilist{1, 2, 3, 4};
+  lib::list<int> list1;
+  list1 = ilist;
+  ASSERT_EQ(list1.size(), ilist.size());
+  int counter{0};
+  for (auto v : list1) {
+    ASSERT_EQ(v, ++counter);
+  }
+
+  std::initializer_list<int> ilist2{};
+  list1 = ilist2;
+  ASSERT_EQ(list1.size(), 0);
+  ASSERT_TRUE(list1.empty());
+}
+
+TEST(SpecialFunctions, InitializerListConstructor) {
+  lib::list<int> list1{1, 2, 3, 4, 5, 6};
+  int counter{1};
+  ASSERT_EQ(list1.size(), 6);
+  for (auto v : list1) {
+    ASSERT_EQ(v, counter++);
+  }
+
+  lib::list<std::string> list2{"first", "second", "third"};
+  ASSERT_EQ(list2.size(), 3);
+  auto iterator = list2.begin();
+  ASSERT_EQ(*iterator++, "first");
+  ASSERT_EQ(*iterator++, "second");
+  ASSERT_EQ(*iterator++, "third");
+}
+
+TEST(SpecialFunctions, MoveAssing) {
+  lib::list<int> list1{1, 2, 3, 4, 5, 6};
+  lib::list<int> list2 = std::move(list1);
+  ASSERT_EQ(list1.size(), 0);
+  ASSERT_EQ(list2.size(), 6);
+  int counter{1};
+  for (auto it = list2.begin(); it != list2.end(); ++it) {
+    ASSERT_EQ(*it, counter++);
+  }
+}
+
+TEST(SpecialFunctions, RangeAssign) {
+  int array[] = {1, 2, 3, 4, 5};
+  lib::list<int> list1;
+  list1.assign(array, array + 5);
+  ASSERT_EQ(list1.size(), 5);
+  int counter{0};
+  for (auto v : list1) {
+    ASSERT_EQ(v, ++counter);
+  }
+
+  list1.clear();
+  list1.assign(array, array);
+  ASSERT_EQ(list1.size(), 0);
+}
+
+TEST(SpecialFunctions, RangeConstructor) {
+  int array[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+  lib::list<int> list1(array, array + 9);
+  int counter{1};
+  EXPECT_EQ(list1.size(), 9);
+  for (auto v : list1) {
+    EXPECT_EQ(v, counter++);
+  }
+}
+
+TEST(SpecialFunctions, CopyConstructor) {
+  lib::list<int> list1{1, 2, 3, 4};
+  lib::list<int> list2(list1);
+  EXPECT_EQ(list2.size(), 4);
+  int counter{1};
+  for (auto v : list2) {
+    EXPECT_EQ(v, counter++);
+  }
+}
+
+TEST(SpecialFunctions, MoveConstructor) {
+  lib::list<int> list1{1, 2, 3, 4, 5, 6};
+  lib::list<int> list2{std::move(list1)};
+  EXPECT_EQ(list1.size(), 0);
+  EXPECT_EQ(list2.size(), 6);
+  int counter{1};
+  for (auto v : list2) {
+    EXPECT_EQ(v, counter++);
+  }
+}
 TEST(Iterator, Decrement) {
   lib::list<int> list1{1, 2, 3, 4, 5};
   int counter{6};
