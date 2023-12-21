@@ -1,5 +1,6 @@
 #include "../src/DoubleLinkedList.h"
 #include "gtest/gtest.h"
+#include <cstddef>    // size_t
 #include <functional> // function<>, greater<>, less<>
 #include <initializer_list>
 #include <list>
@@ -222,7 +223,6 @@ TEST(Iterator, Decrement) {
   sc::list<int> list2{1, 2, 3, 4};
   auto it = list2.end() - 3;
   EXPECT_EQ(*it, 2);
-  std::cout << "poassout\n\n\n" << std::flush;
 }
 
 TEST(Iterator, Difference) {
@@ -279,6 +279,225 @@ TEST(Capacity, size) {
   lib::list<int> list1{1, 2, 3}, list2;
   EXPECT_EQ(list1.size(), 3);
   EXPECT_EQ(list2.size(), 0);
+}
+
+TEST(Modifiers, clear) {
+  lib::list<int> list1{1, 23, 45}, list2;
+  list1.clear();
+  EXPECT_TRUE(list1.empty());
+
+  list2.clear();
+  EXPECT_TRUE(list2.empty());
+}
+
+TEST(Modifiers, InsertValue) {
+  lib::list<int> list1{1, 4, 5};
+  list1.insert(list1.begin(), 0);
+  ASSERT_EQ(list1.front(), 0);
+
+  auto it = list1.insert(++(++list1.begin()), 3);
+  EXPECT_TRUE(it == ++(++list1.begin()));
+
+  it = list1.insert(it, 2);
+  EXPECT_TRUE(it == ++(++list1.begin()));
+
+  it = list1.insert(list1.end(), 6);
+  EXPECT_TRUE(it == --list1.end());
+
+  int counter{-1};
+  for (auto v : list1) {
+    ASSERT_EQ(v, ++counter);
+  }
+  ASSERT_EQ(list1.size(), 7);
+}
+
+TEST(Modifiers, InsertRange) {
+  int array[] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+  lib::list<int> list1;
+  auto it = list1.insert(list1.end(), array, array + 9);
+  EXPECT_EQ(list1.size(), 9);
+  EXPECT_TRUE(it == list1.begin());
+  int counter{0};
+  for (auto v : list1) {
+    EXPECT_EQ(v, ++counter);
+  }
+
+  list1.clear();
+  list1.insert(list1.begin(), array, array + 5);
+  list1.insert(list1.end(), array + 5, array + 9);
+
+  EXPECT_EQ(list1.size(), 9);
+  counter = 0;
+  for (auto v : list1) {
+    EXPECT_EQ(v, ++counter);
+  }
+}
+
+TEST(Modifiers, InsertInitializerList) {
+  std::initializer_list<int> ilist1{1, 2}, ilist2{3, 4, 5, 6, 7}, ilist3{8, 9};
+  lib::list<int> list1;
+  list1.insert(list1.begin(), ilist1);
+  EXPECT_EQ(list1.size(), 2);
+  int index{0};
+  for (auto v : list1) {
+    EXPECT_EQ(v, ++index);
+  }
+
+  list1.insert(list1.end(), ilist3);
+  EXPECT_EQ(list1.size(), 4);
+  index = 0;
+  for (auto v : list1) {
+    if (++index < 3) {
+      EXPECT_EQ(v, index);
+    } else {
+      EXPECT_EQ(v, index + 5);
+    }
+  }
+
+  list1.insert(++(++list1.begin()), ilist2);
+  EXPECT_EQ(list1.size(), 9);
+  index = 0;
+  for (auto v : list1) {
+    EXPECT_EQ(v, ++index);
+  }
+}
+
+TEST(Modifiers, InsertCopies) {
+  lib::list<int> list1;
+  list1.insert(list1.begin(), (size_t)2, 99);
+  EXPECT_EQ(list1.size(), 2);
+  for (auto v : list1) {
+    EXPECT_EQ(v, 99);
+  }
+
+  list1.insert(list1.end(), (size_t)6, 44);
+  EXPECT_EQ(list1.size(), 8);
+  int index{0};
+  for (auto v : list1) {
+    if (++index < 3) {
+      EXPECT_EQ(v, 99);
+    } else {
+      EXPECT_EQ(v, 44);
+    }
+  }
+
+  list1.insert(++(++list1.begin()), (size_t)3, 22);
+  EXPECT_EQ(list1.size(), 11);
+  index = 0;
+  for (auto v : list1) {
+    if (++index < 3) {
+      EXPECT_EQ(v, 99);
+    } else if (index < 6) {
+      EXPECT_EQ(v, 22);
+    } else {
+      EXPECT_EQ(v, 44);
+    }
+  }
+}
+
+TEST(Modifiers, EraseValue) {
+  lib::list<int> list1{1, 2, 3, 4, 5, 6};
+
+  list1.erase(list1.begin());
+  EXPECT_EQ(list1.front(), 2);
+  EXPECT_EQ(list1.size(), 5);
+
+  list1.erase(--list1.end());
+  EXPECT_EQ(list1.back(), 5);
+  EXPECT_EQ(list1.size(), 4);
+
+  for (auto runner = list1.begin(); runner != list1.end();) {
+    runner = list1.erase(runner);
+  }
+  EXPECT_TRUE(list1.empty());
+}
+
+TEST(Modifiers, EraseRange) {
+  lib::list<int> list1{1, 2, 3, 4, 5, 6, 7, 8, 9};
+  auto returned = list1.erase(list1.begin(), list1.begin());
+  EXPECT_EQ(list1.size(), 9);
+  EXPECT_TRUE(returned == list1.begin());
+
+  returned = list1.erase(list1.begin(), ++list1.begin());
+  EXPECT_TRUE(returned == list1.begin());
+  EXPECT_EQ(list1.size(), 8);
+
+  auto it = ++(++list1.begin());
+  returned = list1.erase(list1.begin(), it);
+  EXPECT_TRUE(returned == it);
+  EXPECT_EQ(list1.size(), 6);
+
+  returned = list1.erase(list1.begin(), list1.end());
+  EXPECT_TRUE(returned == list1.end());
+  EXPECT_TRUE(list1.empty());
+}
+
+TEST(Modifiers, push_back) {
+  lib::list<int> list1{1, 2}, list2;
+  for (int counter{0}; counter < 5; ++counter) {
+    list1.push_back(counter);
+    EXPECT_EQ(list1.size(), counter + 3);
+    EXPECT_EQ(list1.back(), counter);
+  }
+
+  list2.push_back(4);
+  EXPECT_EQ(list2.size(), 1);
+  EXPECT_EQ(list2.back(), 4);
+}
+
+TEST(Modifiers, push_front) {
+  lib::list<int> list1{1, 2}, list2;
+  for (int counter{0}; counter < 5; ++counter) {
+    list1.push_front(counter);
+    EXPECT_EQ(list1.size(), counter + 3);
+    EXPECT_EQ(list1.front(), counter);
+  }
+
+  list2.push_front(4);
+  EXPECT_EQ(list2.size(), 1);
+  EXPECT_EQ(list2.front(), 4);
+}
+
+TEST(Modifiers, pop_back) {
+  lib::list<int> list1{1, 2, 3, 4, 5};
+  for (int counter{5}; counter > 0; --counter) {
+    EXPECT_EQ(list1.back(), counter);
+    list1.pop_back();
+  }
+  EXPECT_TRUE(list1.empty());
+}
+
+TEST(Modifiers, pop_front) {
+  lib::list<int> list1{1, 2, 3, 4, 5};
+  for (int counter{1}; counter <= 5; ++counter) {
+    EXPECT_EQ(list1.front(), counter);
+    list1.pop_front();
+  }
+  EXPECT_TRUE(list1.empty());
+}
+
+TEST(Modifiers, resize) {
+  lib::list<int> list1{1, 2, 3, 4, 5, 6, 7, 8, 9};
+  list1.resize(14);
+  EXPECT_EQ(list1.size(), 14);
+  int index{0};
+  for (auto v : list1) {
+    if (index < 9) {
+      EXPECT_EQ(v, ++index);
+    } else {
+      EXPECT_EQ(v, int());
+    }
+  }
+
+  list1.resize(4);
+  EXPECT_EQ(list1.size(), 4);
+  index = 0;
+  for (auto v : list1) {
+    EXPECT_EQ(v, ++index);
+  }
+
+  list1.resize(0);
+  EXPECT_EQ(list1.size(), 0);
 }
 
 TEST(Operations, merge) {
