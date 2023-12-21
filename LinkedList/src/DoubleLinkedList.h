@@ -155,6 +155,89 @@ public:
   [[nodiscard]] size_type size() const { return m_size; }
 
   ///=== [V] Modifiers.
+  void clear() {
+    if (m_size > 0) {
+      iterator runner = begin();
+      iterator it_end = end();
+      while (runner != it_end) {
+        node_pointer aux = &runner;
+        ++runner;
+        delete aux;
+      }
+      reset_controls();
+    }
+  }
+  /*!
+   * Inserts "value" data before node being pointer by "pos".
+   * \param pos iterator pointing to the node past the position to insert.
+   * \param value data to insert.
+   * \return iterator pointing to the inserted node.
+   */
+  iterator insert(iterator pos, const_reference value) {
+    ++m_size;
+    node_pointer new_node = new Node(value, &pos, (&pos)->previous);
+    (&pos)->previous->next = new_node;
+    (&pos)->previous = new_node;
+    return iterator(new_node);
+  }
+  iterator insert(iterator pos, size_type count, const_reference value) {
+    iterator first_inserted = insert(pos, value);
+    while (--count) {
+      insert(pos, value);
+    }
+    return first_inserted;
+  }
+  // TODO be carefully with ambiguity with copy insert.
+  template <class InputIt>
+  iterator insert(iterator pos, InputIt first, InputIt last) {
+    iterator first_inserted = insert(pos, *first++);
+    for (; first != last; ++first) {
+      insert(pos, *first);
+    }
+    return first_inserted;
+  }
+  iterator insert(iterator pos, std::initializer_list<value_type> ilist) {
+    iterator first_inserted = insert(pos, *ilist.begin());
+    for (auto runner = ilist.begin() + 1; runner != ilist.end(); ++runner) {
+      insert(pos, *runner);
+    }
+    return first_inserted;
+  }
+  iterator erase(iterator pos) {
+    --m_size;
+    auto past_removed = pos + 1;
+    (&pos)->previous->next = (&pos)->next;
+    (&pos)->next->previous = (&pos)->previous;
+    delete &pos;
+    return past_removed;
+  }
+  iterator erase(iterator first, iterator last) {
+    if (first == last) {
+      return first;
+    }
+    (&first)->previous->next = &last;
+    (&last)->previous = (&first)->previous;
+    while (first != last) {
+      auto aux = first + 1;
+      delete &first;
+      first = aux;
+      --m_size;
+    }
+    return last;
+  }
+  void push_back(const_reference value) { insert(end(), value); }
+  void pop_back() { erase(--end()); }
+  void push_front(const_reference value) { insert(begin(), value); }
+  void pop_front() { erase(begin()); }
+  void resize(size_type count, const_reference value = value_type()) {
+    if (m_size > count) {
+      erase(begin() + count, end());
+    }
+    while (m_size < count) {
+      push_back(value);
+    }
+  }
+
   ///=== [VI] Operations.
 
   class iterator {
@@ -257,6 +340,21 @@ private:
     m_head->next = m_tail;
     m_tail->previous = m_head;
   }
+  /*!
+   * Inserts "node" before position pointed by "pos".
+   * \param pos iterator pointing to the node past the position to insert.
+   * \param node node to insert.
+   * \return iterator to inserted node.
+   */
+  iterator insert_not_creating(iterator pos, Node *node) {
+    ++m_size;
+    node->next = &pos;
+    node->previous = (&pos)->previous;
+    (&pos)->previous->next = node;
+    (&pos)->previous = node;
+    return iterator(node);
+  }
+
   node_pointer m_head; //!< Pointer to the head node.
   node_pointer m_tail; //!< Pointer to the tail node.
   size_type m_size{0}; //!< Number of elements in the list.
