@@ -151,6 +151,9 @@ public:
   iterator end() { return iterator(m_tail); }
 
   ///=== [IV] Capacity.
+  [[nodiscard]] bool empty() const { return m_size == 0; }
+  [[nodiscard]] size_type size() const { return m_size; }
+
   ///=== [V] Modifiers.
   ///=== [VI] Operations.
 
