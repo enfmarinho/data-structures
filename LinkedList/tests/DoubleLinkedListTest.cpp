@@ -1,12 +1,15 @@
 #include "../src/DoubleLinkedList.h"
 #include "gtest/gtest.h"
+#include <functional> // function<>, greater<>, less<>
+#include <initializer_list>
+#include <list>
 
 /*
  * The "lib" macro can be used to select which lib to test. To ensure the
  * integrity of the tests, the "std" namespace must be used, to effectively test
- * the vector developed the "sc" namespace must be used. Some tests do not use
- * this macro because the functions they tests are not defined in the standard
- * library, instead the namespace "sc" is used directly.
+ * the double linked list developed the "sc" namespace must be used. Some tests
+ * do not use this macro because the functions they test are not defined in the
+ * standard library, so the namespace "sc" is used directly instead.
  */
 #define lib sc
 // #define lib std
@@ -277,6 +280,172 @@ TEST(Capacity, size) {
   EXPECT_EQ(list1.size(), 3);
   EXPECT_EQ(list2.size(), 0);
 }
+
+TEST(Operations, merge) {
+  lib::list<int> list1{1, 3, 5, 7, 9}, list2{2, 4, 6, 8};
+  list1.merge(std::move(list2));
+  EXPECT_EQ(list1.size(), 9);
+  int counter{0};
+  for (auto v : list1) {
+    EXPECT_EQ(v, ++counter);
+  }
+
+  lib::list<int> list3, list4{-2, -1, 0};
+  list1.merge(std::move(list3));
+  EXPECT_EQ(list1.size(), 9);
+  list1.merge(std::move(list4));
+  counter = -3;
+  for (auto v : list1) {
+    EXPECT_EQ(v, ++counter);
+  }
+}
+
+TEST(Operations, splice) {
+  lib::list<int> list1{2, 3, 7, 8}, list2{4, 5, 6}, list3{0, 1}, list4{9, 10};
+  list1.splice(++(++list1.begin()), std::move(list2));
+  EXPECT_EQ(list1.size(), 7);
+  EXPECT_TRUE(list2.empty());
+
+  list1.splice(list1.begin(), std::move(list3));
+  EXPECT_EQ(list1.size(), 9);
+  EXPECT_TRUE(list3.empty());
+
+  list1.splice(list1.end(), std::move(list4));
+  EXPECT_EQ(list1.size(), 11);
+  EXPECT_TRUE(list4.empty());
+
+  int counter{-1};
+  for (auto v : list1) {
+    EXPECT_EQ(v, ++counter);
+  }
+
+  lib::list<int> list5;
+  list5.splice(list5.end(), std::move(list1));
+  EXPECT_EQ(list5.size(), 11);
+  EXPECT_TRUE(list1.empty());
+
+  counter = -1;
+  for (auto v : list5) {
+    EXPECT_EQ(v, ++counter);
+  }
+}
+
+TEST(Operations, remove) {
+  sc::list<int> list1{1, 2, 3, 4, 5, 6, 7}, list2{2, 2, 2, 2, 2, 2};
+  EXPECT_EQ(list1.remove(7), 1);
+  EXPECT_EQ(list1.back(), 6);
+
+  EXPECT_EQ(list2.remove(2), 6);
+  EXPECT_TRUE(list2.empty());
+
+  sc::list<int> list3{3, 3, 3, 4, 3, 3};
+  EXPECT_EQ(list3.remove(3), 5);
+  EXPECT_EQ(list3.size(), 1);
+  EXPECT_EQ(list3.front(), 4);
+}
+
+TEST(Operations, remove_if) {
+  sc::list<int> list1{1, 2, 3, 4, 5, 6, 7, 8, 9}, list2{1, 3, 5, 7, 9};
+  struct function {
+    static bool even(int input) { return input % 2 == 0; }
+    static bool positive(int input) { return input > 0; }
+  } functions;
+
+  EXPECT_EQ(list1.remove_if(functions.even), 4);
+  for (auto v : list1) {
+    EXPECT_FALSE(functions.even(v));
+  }
+
+  EXPECT_EQ(list1.remove_if(functions.positive), 5);
+  EXPECT_TRUE(list1.empty());
+
+  sc::list<int> list3{-3, 3, 9, 1, -9, -12, 99, 17, 8, -8, 0};
+  EXPECT_EQ(list3.remove_if(functions.positive), 6);
+  for (auto v : list3) {
+    EXPECT_TRUE(v <= 0);
+  }
+}
+
+TEST(Operations, reverse) {
+  lib::list<int> list1{1, 2, 3, 4, 5, 6, 7, 8, 9};
+  list1.reverse();
+  int counter{10};
+  for (auto v : list1) {
+    EXPECT_EQ(v, --counter);
+  }
+
+  list1.reverse();
+  counter = 0;
+  for (auto v : list1) {
+    EXPECT_EQ(v, ++counter);
+  }
+
+  lib::list<int> list2{1};
+  list2.reverse();
+  EXPECT_EQ(list2.size(), 1);
+  EXPECT_EQ(list2.front(), 1);
+
+  lib::list<int> list3;
+  list3.reverse();
+  EXPECT_TRUE(list3.empty());
+}
+
+TEST(Operations, unique) {
+  sc::list<int> list1{1, 2, 3, 4, 5, 6}, list_r1{1, 2, 3, 4, 5, 6};
+  auto it_begin = list1.begin();
+  auto it_end = list1.end();
+  EXPECT_EQ(list1.unique(), 0);
+  EXPECT_TRUE(list1 == list_r1);
+  *it_begin = 40;
+  *(--it_end) = 90;
+  EXPECT_EQ(list1.front(), 40);
+  EXPECT_EQ(list1.back(), 90);
+
+  sc::list<int> list2{1, 1, 1, 2, 2, 3, 7, 7, 9}, list_r2{1, 2, 3, 7, 9};
+  EXPECT_EQ(list2.unique(), 4);
+  EXPECT_TRUE(list2 == list_r2);
+
+  sc::list<int> list3{1, 1, 7, 7, 3, 2, 2}, list_r3{1, 7, 3, 2};
+  EXPECT_EQ(list3.unique(), 3);
+  EXPECT_TRUE(list3 == list_r3);
+}
+
+TEST(Operations, sort) {
+  auto check = [&](lib::list<int> input,
+                   std::function<bool(int, int)> comp) -> bool {
+    for (auto fast = ++input.begin(), slow = input.begin(); fast != input.end();
+         ++fast) {
+      if (comp(*fast, *slow)) {
+        return false;
+      }
+      slow = fast;
+    }
+    return true;
+  };
+
+  lib::list<int> list1{1, 2, 3, 4, 5, 6};
+  auto it_begin = list1.begin();
+  auto it_end = list1.end();
+  list1.sort();
+  EXPECT_TRUE(check(list1, std::less()));
+  *it_begin = 90;
+  *(--it_end) = 30;
+  EXPECT_EQ(list1.front(), 90);
+  EXPECT_EQ(list1.back(), 30);
+
+  lib::list<int> list2{9, 8, 7, 6, 5, 4, 3, 2, 1};
+  list2.sort();
+  EXPECT_TRUE(check(list2, std::less()));
+  list2.sort(std::greater());
+  EXPECT_TRUE(check(list2, std::greater()));
+
+  lib::list<int> list3{1, 2, 3, 9, 8, 4, 1, 3, 2, 3, 4};
+  list3.sort(std::greater());
+  EXPECT_TRUE(check(list3, std::greater()));
+  list3.sort(std::less());
+  EXPECT_TRUE(check(list3, std::less()));
+}
+
 int main(int argc, char *argv[]) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
