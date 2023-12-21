@@ -184,6 +184,27 @@ TEST(SpecialFunctions, MoveConstructor) {
     EXPECT_EQ(v, counter++);
   }
 }
+
+TEST(ElementAccess, front) {
+  lib::list<int> list1{1, 2, 3}, list2{11};
+  EXPECT_EQ(list1.front(), 1);
+  EXPECT_EQ(list2.front(), 11);
+  list1.front() = 99;
+  EXPECT_EQ(list1.front(), 99);
+  const lib::list<int> list3{10, 11};
+  EXPECT_EQ(list3.front(), 10);
+}
+
+TEST(ElementAccess, back) {
+  lib::list<int> list1{1, 2, 3}, list2{11};
+  EXPECT_EQ(list1.back(), 3);
+  EXPECT_EQ(list2.back(), 11);
+  list1.back() = 99;
+  EXPECT_EQ(list1.back(), 99);
+  const lib::list<int> list3{10, 11};
+  EXPECT_EQ(list3.back(), 11);
+}
+
 TEST(Iterator, Decrement) {
   lib::list<int> list1{1, 2, 3, 4, 5};
   int counter{6};
