@@ -5,7 +5,6 @@
 #include <cstddef>    // size_t
 #include <functional> // function<>, equal_to<>, greater<>
 #include <initializer_list>
-#include <iterator> // distance()
 
 // Namespace for sequential containers(sc).
 namespace sc {
@@ -93,16 +92,22 @@ public:
     other.reset_controls();
   }
   void assign(size_type count, const_reference value = value_type()) {
-    iterator list_runner = begin();
-    size_type counter{0};
-    for (; m_size > 0 and counter < count; --m_size, ++list_runner, ++counter) {
-      *list_runner = value;
-    }
-    erase(list_runner, end());
-    for (; counter < count; ++counter) {
+    // TODO optimize this. Make use of existing nodes.
+    clear();
+    while (count--) {
       push_back(value);
     }
-    m_size = count;
+    // iterator list_runner = begin();
+    // size_type counter{0};
+    // for (; m_size > 0 and counter < count; --m_size, ++list_runner,
+    // ++counter) {
+    //   *list_runner = value;
+    // }
+    // erase(list_runner, end());
+    // for (; counter < count; ++counter) {
+    //   push_back(value);
+    // }
+    // m_size = count;
   }
   template <typename InputIt> void assign(InputIt first, InputIt last) {
     // TODO optimize this. Make use of existing nodes.
@@ -255,9 +260,11 @@ public:
     iterator(node_pointer pointer) : m_pointer{pointer} {}
     ~iterator() = default;
     node_pointer operator&() { return m_pointer; }
-    // const_node_pointer operator&() const { return m_pointer; }
+    const_node_pointer operator&() const { return m_pointer; }
     reference operator*() { return m_pointer->data; }
     const_reference operator*() const { return m_pointer->data; }
+    pointer operator->() { return &m_pointer->data; }
+    const_pointer operator->() const { return &m_pointer->data; }
     iterator operator++() {
       m_pointer = m_pointer->next;
       return *this;
@@ -267,16 +274,16 @@ public:
       ++(*this);
       return copy;
     }
-    friend iterator operator+(iterator it, size_type increment) {
-      for (size_type counter{0}; counter < increment; ++counter) {
+    friend iterator operator+(iterator it, difference_type increment) {
+      for (difference_type counter{0}; counter < increment; ++counter) {
         ++it;
       }
-      for (size_type counter{0}; counter > increment; --counter) {
+      for (difference_type counter{0}; counter > increment; --counter) {
         --it;
       }
       return it;
     }
-    friend iterator operator+(size_type increment, iterator it) {
+    friend iterator operator+(difference_type increment, iterator it) {
       return it + increment;
     }
     iterator operator--() {
@@ -288,7 +295,7 @@ public:
       --(*this);
       return copy;
     }
-    friend iterator operator-(iterator it, size_type decrement) {
+    friend iterator operator-(iterator it, difference_type decrement) {
       return it + (-decrement);
     }
     difference_type operator-(const iterator &right) {
