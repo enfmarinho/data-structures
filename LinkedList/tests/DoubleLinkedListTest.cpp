@@ -109,6 +109,18 @@ TEST(Iterator, EquivalentOperator) {
   EXPECT_FALSE(list1.begin() == list1.end());
   EXPECT_TRUE(list1.begin() == list1.begin());
 }
+
+TEST(Capacity, empty) {
+  lib::list<int> list1{1, 2, 3}, list2;
+  EXPECT_FALSE(list1.empty());
+  EXPECT_TRUE(list2.empty());
+}
+
+TEST(Capacity, size) {
+  lib::list<int> list1{1, 2, 3}, list2;
+  EXPECT_EQ(list1.size(), 3);
+  EXPECT_EQ(list2.size(), 0);
+}
 int main(int argc, char *argv[]) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
