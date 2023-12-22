@@ -37,51 +37,98 @@ public:
   };
 
   ///=== [I] Special Functions.
+  /*!
+   * Default constructor. Creates a list with "count" copies of "value".
+   * In case no parameters are provided, the vector will be created empty.
+   * \param count number of elements to insert.
+   * \param value data to store in the vector.
+   */
   list(size_type count = 0, const_reference value = value_type()) {
     initialize();
     assign(count, value);
   }
+  /*!
+   * Creates a list with the data in the range [begin, end).
+   * \param begin beginning of the range.
+   * \param end ending of the range (not included).
+   */
   template <typename InputIt> list(InputIt first, InputIt last) {
     initialize();
     assign(first, last);
   }
+  /*!
+   * Copy constructor. Creates a list equivalent to "copy".
+   * \param copy list to be copied.
+   */
   list(list &other) {
     initialize();
     assign(other);
   }
+  /*!
+   * Move constructor. Creates a list with the nodes of "other" list.
+   * After operation is done, "other" will be empty.
+   * \param other list to take memory from.
+   */
   list(list &&other) {
     initialize();
     assign(std::move(other));
   }
+  /*!
+   * Creates a list with the same size and the same elements as "ilist".
+   * \param ilist initializer_list with the elements to insert.
+   */
   list(std::initializer_list<value_type> ilist) {
     initialize();
     for (auto runner = ilist.begin(); runner != ilist.end(); ++runner) {
       push_back(*runner);
     }
   }
+  /// Deallocates memory.
   ~list() {
     clear();
     delete m_head;
     delete m_tail;
   }
+  /*!
+   * Makes the list equivalent to "copy".
+   * \param copy list to be copied.
+   */
   list_reference operator=(list &other) {
     assign(other);
     return other;
   }
+  /*!
+   * Makes this be equal to "other" by taking ownership of its nodes.
+   * After operation is done, "other" will be empty.
+   * \param other list to take memory from.
+   */
   list_reference operator=(list &&other) {
     assign(other);
     return *this;
   }
+  /*!
+   * Makes the list equal to the ilist.
+   * \param ilist initializer_list with the elements to insert.
+   */
   list_reference operator=(std::initializer_list<value_type> ilist) {
     assign(ilist);
     return *this;
   }
+  /*!
+   * Makes the list equivalent to "copy".
+   * \param copy list to be copied.
+   */
   void assign(list &other) {
     clear();
     for (auto v : other) {
       push_back(v);
     }
   }
+  /*!
+   * Makes this be equal to "other" by taking ownership of its nodes.
+   * After operation is done, "other" will be empty.
+   * \param other list to take memory from.
+   */
   void assign(list &&other) {
     clear();
     m_head->next = other.m_head->next;
@@ -91,6 +138,12 @@ public:
     m_size = other.m_size;
     other.reset_controls();
   }
+  /*!
+   * Make this have "count" copies of the data "value".
+   * \param count number of elements to insert.
+   * \param value data to store in the vector. If not provided, default
+   *        constructor of the value_type will be used.
+   */
   void assign(size_type count, const_reference value = value_type()) {
     // TODO optimize this. Make use of existing nodes.
     clear();
@@ -109,6 +162,11 @@ public:
     // }
     // m_size = count;
   }
+  /*!
+   * Makes the list contain the same data stored in the range [begin, end).
+   * \param begin beginning of the range.
+   * \param end ending of the range (not included).
+   */
   template <typename InputIt> void assign(InputIt first, InputIt last) {
     // TODO optimize this. Make use of existing nodes.
     clear();
@@ -126,6 +184,10 @@ public:
     // }
     // m_size = new_size;
   }
+  /*!
+   * Makes the list equal to the ilist.
+   * \param ilist initializer_list with the elements to insert.
+   */
   void assign(std::initializer_list<value_type> ilist) {
     // TODO optimize this. Make use of existing nodes.
     clear();
@@ -146,20 +208,35 @@ public:
   }
 
   ///=== [II] Element Access.
+  /// Access the element in the front of the container.
   reference front() { return m_head->next->data; };
+  /// Access the element in the front of the container.
   const_reference front() const { return m_head->next->data; };
+  /// Access the element in the end of the container.
   reference back() { return m_tail->previous->data; };
+  /// Access the element in the end of the container.
   const_reference back() const { return m_tail->previous->data; };
 
   ///=== [III] Iterators.
+  /*!
+   * Gets a iterator to the beginning of the container.
+   * \return iterator pointing to the beginning of the container.
+   */
   iterator begin() { return iterator(m_head->next); }
+  /*!
+   * Gets a iterator to the element past the last element of  the container.
+   * \return iterator to the element past the last element of the container.
+   */
   iterator end() { return iterator(m_tail); }
 
   ///=== [IV] Capacity.
+  /// Consults whether the container is empty.
   [[nodiscard]] bool empty() const { return m_size == 0; }
+  /// Consults the number of elements in the container.
   [[nodiscard]] size_type size() const { return m_size; }
 
   ///=== [V] Modifiers.
+  /// Removes all elements of the container, i.e. empties it.
   void clear() {
     if (m_size > 0) {
       iterator runner = begin();
@@ -185,14 +262,33 @@ public:
     (&pos)->previous = new_node;
     return iterator(new_node);
   }
+  /*!
+   * Inserts "count" copies of "value" before position pointed by "pos".
+   * Note: be careful to avoid ambiguity with the range insert function.
+   * \param pos iterator pointing to the element past the position to insert.
+   * \param count number of copies to insert.
+   * \param value data to insert.
+   * \return iterator pointing to the first element inserted, or "pos" if
+   *         "count" == 0.
+   */
   iterator insert(iterator pos, size_type count, const_reference value) {
+    if (count == 0) {
+      return pos;
+    }
     iterator first_inserted = insert(pos, value);
     while (--count) {
       insert(pos, value);
     }
     return first_inserted;
   }
-  // TODO be carefully with ambiguity with copy insert.
+  /*!
+   * Inserts elements in range [first, last) before position pointed by "pos".
+   * Note: be careful to avoid ambiguity with the copy insert function.
+   * \param first beginning of the range of elements.
+   * \param last end of the range of elements.
+   * \return iterator pointing to the first element inserted, or "pos" if
+   * "first" == "last".
+   */
   template <class InputIt>
   iterator insert(iterator pos, InputIt first, InputIt last) {
     iterator first_inserted = insert(pos, *first++);
@@ -201,6 +297,14 @@ public:
     }
     return first_inserted;
   }
+
+  /*!
+   * Inserts elements from "ilist" before position pointed by "pos".
+   * \param pos iterator pointing to the element past the position to insert.
+   * \param ilist initializer_list with elements to insert.
+   * \return iterator pointing to first element inserted, or "pos" if "ilist" is
+   *         empty.
+   */
   iterator insert(iterator pos, std::initializer_list<value_type> ilist) {
     iterator first_inserted = insert(pos, *ilist.begin());
     for (auto runner = ilist.begin() + 1; runner != ilist.end(); ++runner) {
@@ -208,6 +312,12 @@ public:
     }
     return first_inserted;
   }
+  /*!
+   * Removes the element pointed by "pos".
+   * \param pos iterator pointing to the element to remove.
+   * \return iterator pointing to the element past the removed one. Note, that
+   *         it can return end().
+   */
   iterator erase(iterator pos) {
     --m_size;
     auto past_removed = pos + 1;
@@ -216,6 +326,13 @@ public:
     delete &pos;
     return past_removed;
   }
+  /*!
+   * Removes the range of elements ["first", "last").
+   * \param first iterator pointing to the beginning of the range.
+   * \param last iterator pointing to the end of the range (not included).
+   * \return iterator pointing to the element past the removed one. Note, that
+   *         it can return end().
+   */
   iterator erase(iterator first, iterator last) {
     if (first == last) {
       return first;
@@ -230,10 +347,28 @@ public:
     }
     return last;
   }
+  /*!
+   * Inserts a element in the end of the container.
+   * \param value data to store.
+   */
   void push_back(const_reference value) { insert(end(), value); }
+  /// Removes the last element in the container.
   void pop_back() { erase(--end()); }
+  /*!
+   * Inserts a element in the beginning of the container.
+   * \param value data to store.
+   */
   void push_front(const_reference value) { insert(begin(), value); }
+  /// Removes the first element in the container.
   void pop_front() { erase(begin()); }
+  /*!
+   * Changes the size of the container. If new_size > size, increases size
+   * of the container inserting copies of "value". If new_size < size, reduces
+   * the size of the container. Otherwise, do nothing.
+   * \param new_size new size of the container.
+   * \param value data to store in case on need. If not provided, default
+   *        constructor will be used.
+   */
   void resize(size_type count, const_reference value = value_type()) {
     if (m_size > count) {
       erase(begin() + count, end());
@@ -256,24 +391,43 @@ public:
     using size_type = size_t;
     using difference_type = std::ptrdiff_t;
 
+    /// Default constructor.
     iterator() = default;
+    /// Makes a iterator pointing to the node at the address "pointer".
     iterator(node_pointer pointer) : m_pointer{pointer} {}
+    /// Copy constructor.
+    iterator(const iterator &) = default;
+    /// Destructor.
     ~iterator() = default;
+    /// Consults the underlying pointer of the node being pointed by iterator.
     node_pointer operator&() { return m_pointer; }
+    /// Consults the underlying pointer of the node being pointed by iterator.
     const_node_pointer operator&() const { return m_pointer; }
+    /// Gets a reference to the data being pointed by this iterator.
     reference operator*() { return m_pointer->data; }
+    /// Gets a constant reference to the data being pointed by this iterator.
     const_reference operator*() const { return m_pointer->data; }
+    /// Arrow operator.
     pointer operator->() { return &m_pointer->data; }
+    /// Arrow operator.
     const_pointer operator->() const { return &m_pointer->data; }
+    /// Pre-increment.
     iterator operator++() {
       m_pointer = m_pointer->next;
       return *this;
     }
+    /// Pos-increment
     iterator operator++(int) {
       iterator copy = *this;
       ++(*this);
       return copy;
     }
+    /*!
+     * Increment operator.
+     * \param it iterator to begin the traversal.
+     * \param increment number of nodes to skip.
+     * \return iterator pointing to "increment" nodes after "it".
+     */
     friend iterator operator+(iterator it, difference_type increment) {
       for (difference_type counter{0}; counter < increment; ++counter) {
         ++it;
@@ -283,21 +437,36 @@ public:
       }
       return it;
     }
+    /*!
+     * Increment operator.
+     * \param it iterator to begin the traversal.
+     * \param increment number of nodes to skip.
+     * \return iterator pointing to "increment" nodes after "it".
+     */
     friend iterator operator+(difference_type increment, iterator it) {
       return it + increment;
     }
+    /// Pre-decrement.
     iterator operator--() {
       m_pointer = m_pointer->previous;
       return *this;
     }
+    /// Pos-decrement.
     iterator operator--(int) {
       iterator copy = *this;
       --(*this);
       return copy;
     }
+    /*!
+     * Difference operator.
+     * \param it iterator to begin the traversal.
+     * \param decrement number of nodes to go back.
+     * \return iterator pointing to "decrement" nodes before "it".
+     */
     friend iterator operator-(iterator it, difference_type decrement) {
       return it + (-decrement);
     }
+    /// Difference operator. Returns the distance of this to "right".
     difference_type operator-(const iterator &right) {
       iterator runner = right;
       difference_type counter{0};
@@ -319,19 +488,25 @@ public:
       }
       return INT_MAX; // Case iterators can not reach each other.
     }
+    /*!
+     * Makes this be equal to the iterator "copy".
+     * \param copy iterator to copy the data from.
+     */
     iterator operator=(const iterator &copy) {
       m_pointer = copy.m_pointer;
       return *this;
     }
+    /// Checks whether two iterator are different.
     bool operator!=(const iterator &right) {
       return this->m_pointer != right.m_pointer;
     }
+    /// Checks whether two iterator are equal.
     bool operator==(const iterator &right) {
       return this->m_pointer == right.m_pointer;
     }
 
   protected:
-    node_pointer m_pointer{nullptr};
+    node_pointer m_pointer{nullptr}; //!< Pointer to a node in the container.
   };
 
 private:
