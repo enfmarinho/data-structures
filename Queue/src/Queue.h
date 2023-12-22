@@ -1,6 +1,7 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
+#include <cstddef> // size_t
 #include <deque>
 #include <initializer_list>
 

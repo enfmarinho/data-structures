@@ -1,6 +1,7 @@
 #ifndef STACK_H
 #define STACK_H
 
+#include <cstddef> // size_t
 #include <deque>
 #include <initializer_list>
 
@@ -24,13 +25,13 @@ public:
   using const_reference = const value_type &;
   using size_type = size_t;
   using difference_type = std::ptrdiff_t;
-  using queue_reference = stack &;
+  using stack_reference = stack &;
 
   ///=== [I] Special Functions.
   /// Creates a empty container.
   stack() = default;
   /// Make this be a copy of "other".
-  stack(queue_reference other) = default;
+  stack(stack_reference other) = default;
   /*!
    * Makes this contain the same data stored in the range [begin, end).
    * \param begin beginning of the range.
@@ -41,7 +42,7 @@ public:
   }
   /*!
    * Creates a container with the same size and the same elements as the ilist.
-   * \param ilist initializer_list with elements to insert in the queue.
+   * \param ilist initializer_list with elements to insert in the stack.
    */
   stack(std::initializer_list<value_type> ilist) {
     m_container = Container(ilist);
@@ -49,7 +50,7 @@ public:
   /// Deallocates memory.
   ~stack() = default;
   /// Makes this be a copy of "other".
-  queue_reference operator=(queue_reference other) {
+  stack_reference operator=(stack_reference other) {
     m_container = other.m_container;
   }
 
