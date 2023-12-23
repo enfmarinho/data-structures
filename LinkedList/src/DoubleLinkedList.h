@@ -3,8 +3,9 @@
 
 #include <climits>    // INT_MAX
 #include <cstddef>    // size_t
-#include <functional> // function<>, equal_to<>, greater<>
+#include <functional> // function<>, equal_to<>, less<>
 #include <initializer_list>
+#include <utility> // swap()
 
 // Namespace for sequential containers(sc).
 namespace sc {
@@ -379,6 +380,160 @@ public:
   }
 
   ///=== [VI] Operations.
+  /*!
+   * Merge two halves of the same list. Both sides must be sorted. The end of
+   * the left list is consider to be the beginning of the right list and the
+   * end of the right list is consider to be the end of the list.
+   * \param left_runner iterator to the beginning of the left side of the list.
+   * \param right_runner iterator to the beginning of the right side of the
+   *        list.
+   */
+  void merge(iterator left_runner, iterator right_runner, iterator right_end,
+             Compare comp = std::less<value_type>()) {
+    iterator left_end = right_runner;
+    while (left_runner != left_end and right_runner != right_end) {
+      if (comp(*right_runner, *left_runner)) {
+        iterator right_next = right_runner + 1;
+        erase_not_deleting(right_runner);
+        insert_not_creating(left_runner, &right_runner);
+        right_runner = right_next;
+      } else {
+        ++left_runner;
+      }
+    }
+  }
+  /*!
+   * Merge "other" into this using the "comp" function. Both lists should be
+   * sorted. Once the operation is done, "other" will be empty, as this takes
+   * ownership of its memory.
+   * \param other list to merge into this.
+   * \param comp compare function to use. It must be a function that takes two
+   *        value_types and returns a boolean.
+   */
+  void merge(list &&other, Compare comp = std::less<value_type>()) {
+    auto this_runner = begin();
+    auto other_runner = other.begin();
+    while (this_runner != end() and other_runner != other.end()) {
+      if (comp(*this_runner, *other_runner)) {
+        ++this_runner;
+      } else {
+        iterator copy = other_runner + 1;
+        insert_not_creating(this_runner, &other_runner);
+        other_runner = copy;
+      }
+    }
+    while (other_runner != other.end()) {
+      iterator copy = other_runner + 1;
+      insert_not_creating(end(), &other_runner);
+      other_runner = copy;
+    }
+    other.reset_controls();
+  }
+  /*!
+   * Takes nodes from "other" and inserts it before position pointed by "pos".
+   * \param pos iterator pointing to position past the one to insert.
+   * \param other list to take nodes from.
+   */
+  void splice(iterator pos, list &&other) {
+    for (auto runner = other.begin(); runner != other.end();) {
+      auto copy = runner + 1;
+      insert_not_creating(pos, &runner);
+      runner = copy;
+    }
+
+    other.reset_controls();
+  }
+  /*!
+   * Removes all elements in the list equal to "value", using the == operator.
+   * \param value data to remove.
+   * \return number of elements removed.
+   */
+  size_type remove(const_reference value) {
+    size_type counter{0};
+    for (auto runner = begin(); runner != end();) {
+      if (*runner == value) {
+        runner = erase(runner);
+        ++counter;
+      } else {
+        ++runner;
+      }
+    }
+    return counter;
+  }
+  /*!
+   * Removes all elements in the list that when being given to the unary
+   * predicate "p" returns true.
+   * \param p function that takes a value_type as a parameter and returns a
+   *        boolean, when its true the element is removed.
+   * \return number of elements removed.
+   */
+  template <class UnaryPredicate> size_type remove_if(UnaryPredicate p) {
+    size_type counter{0};
+    for (auto runner = begin(); runner != end();) {
+      if (p(*runner)) {
+        runner = erase(runner);
+        ++counter;
+      } else {
+        ++runner;
+      }
+    }
+    return counter;
+  }
+  /// Reverses the list.
+  void reverse() {
+    iterator runner = begin();
+    while (runner != end()) {
+      iterator copy = runner + 1;
+      std::swap((&runner)->next, (&runner)->previous);
+      runner = copy;
+    }
+    std::swap(m_head->next, m_head->previous);
+    std::swap(m_tail->next, m_tail->previous);
+    std::swap(m_head, m_tail);
+  }
+  /*!
+   * Removes all the consecutive duplicate elements from the list. Only the
+   * first element in each group of equal elements is left. It invalidates the
+   * iterators and references to the removed elements.
+   * \param equal binary predicate which returns true if the elements are
+   * equal. If not provided, the std::equal_to will be used. \return number of
+   * elements removed.
+   */
+  size_type unique(Compare equal = std::equal_to<value_type>()) {
+    iterator unique = begin();
+    size_type counter{0};
+    for (iterator runner = ++begin(); runner != end();) {
+      if (*unique == *runner) {
+        runner = erase(runner);
+        ++counter;
+      } else {
+        unique = runner++;
+      }
+    }
+    return counter;
+  }
+  /*!
+   * Sorts the elements and preserves the order of equivalent elements. No
+   * references or iterators become invalidated.
+   * \param comp binary predicate which returns true if the first element
+   *        provided should come first in the order.
+   */
+  void sort(Compare comp = std::less<value_type>()) {
+    // merge_sort(0, m_size, comp);
+  }
+  /// Checks whether the list "left" are equivalent to the list "right".
+  friend bool operator==(list &left, list &right) {
+    if (left.size() != right.size()) {
+      return false;
+    }
+    for (auto left_it = left.begin(), right_it = right.begin();
+         left_it != left.end(); ++left_it, ++right_it) {
+      if (*left_it != *right_it) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   class iterator {
   public:
@@ -536,6 +691,33 @@ private:
     (&pos)->previous = node;
     return iterator(node);
   }
+  /*!
+   * Erase node being pointer by "pos" without deleting it.
+   * \param pos iterator pointing to node to be deleted.
+   * \return iterator of the node following the deleted one.
+   */
+  iterator erase_not_deleting(iterator pos) {
+    --m_size;
+    (&pos)->previous->next = (&pos)->next;
+    (&pos)->next->previous = (&pos)->previous;
+    return pos + 1;
+  }
+  /*!
+   * Performs a merge sort in the list, starting in the index "first" and
+   * ending in the index "last".
+   * \param first index to begin the merge sort.
+   * \param last index to end the merge sort.
+   */
+  void merge_sort(size_type first, size_type last, Compare comp) {
+    size_type size = last - first;
+    size_type mid = size / 2;
+    if (size > 1) {
+      merge_sort(first, first + mid, comp);
+      merge_sort(first + mid, last, comp);
+      iterator merge_begin = begin() + first;
+      merge(merge_begin, merge_begin + mid, begin() + last, comp);
+    }
+  }
 
   node_pointer m_head; //!< Pointer to the head node.
   node_pointer m_tail; //!< Pointer to the tail node.
@@ -543,4 +725,4 @@ private:
 };
 } // namespace sc
 
-#endif
+#endif // DOUBLE_LINKED_LIST_H
