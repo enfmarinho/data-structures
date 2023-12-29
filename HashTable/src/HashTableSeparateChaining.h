@@ -70,10 +70,66 @@ public:
   void merge(HashTable &other) {}
 
   ///=== [V] Lookup.
-  size_type count(const_reference key) {}
-  iterator find(const_reference key) {}
-  const_iterator find(const_reference key) const {}
-  bool constains(const_reference key) const {}
+  /*!
+   * Counts the number of elements that compares equal to "key".
+   * \param key element to look for.
+   * \return number of elements equal to "key".
+   */
+  size_type count(const_reference key) {
+    size_type index = hash(key);
+    size_type counter{0};
+    for (value_type element : m_table[index]) {
+      if (key_equal{}(element, key)) {
+        ++counter;
+      }
+    }
+    return counter;
+  }
+  /*!
+   * Finds the first occurrence of a element equal to "key", if there is one.
+   * \param key element to look for.
+   * \return iterator to the element, if it exists. Otherwise end().
+   */
+  iterator find(const_reference key) {
+    size_type index = hash(key);
+    for (auto runner = m_table[index].begin(); runner != m_table[index].end();
+         ++runner) {
+      if (key_equal{}(*runner, key)) {
+        return iterator(m_table.begin() + index, runner);
+      }
+    }
+    return end();
+  }
+  /*!
+   * Finds the first occurrence of a element equal to "key", if there is one.
+   * \param key element to look for.
+   * \return const_iterator to the element, if it exists. Otherwise cend().
+   */
+  const_iterator find(const_reference key) const {
+    size_type index = hash(key);
+    for (auto runner = m_table[index].cbegin(); runner != m_table[index].cend();
+         ++runner) {
+      if (key_equal{}(*runner, key)) {
+        return const_iterator(m_table.cbegin() + index, runner);
+      }
+    }
+    return cend();
+  }
+  /*!
+   * Checks if the container has a element equivalent to "key".
+   * \param key element to look for.
+   * \return flag that indicates whether the container has a element equivalent
+   *         to "key".
+   */
+  bool contains(const_reference key) const {
+    size_type index = hash(key);
+    for (value_type element : m_table[index]) {
+      if (key_equal{}(element, key)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   ///=== [VI] Bucket Interface.
   local_iterator begin(const size_type &index) {
