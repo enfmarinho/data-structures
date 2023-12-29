@@ -149,11 +149,38 @@ public:
   size_type bucket(const_reference key) const { return hash(key); }
 
   ///=== [VII] Hash Policy.
-  float load_factor() const {}
-  float max_load_factor() const {}
-  void max_load_factor(float load_factor) {}
-  void rehash(size_type count) {}
-  void reserve(size_type count) {}
+  /// Calculates the average number of elements per bucket
+  float load_factor() const { return size() / (float)bucket_count(); }
+  /// Returns the current max load factor.
+  float max_load_factor() const { return m_max_load_factor; }
+  /// Sets the maximum load factor to "load_factor".
+  void max_load_factor(float load_factor) { m_max_load_factor = load_factor; }
+  /*!
+   * Changes the number of buckets to a value n that is not less than count and
+   * satisfies n >= size() / max_load_factor(), then rehashes the container,
+   * i.e. puts the elements into appropriate buckets.
+   * \param count lower bound for the new number of buckets.
+   */
+  void rehash(size_type count) {
+    size_type new_size = find_next_prime(count);
+    while (new_size < size() / max_load_factor()) {
+      new_size = find_next_prime(new_size);
+    }
+    HashTable new_hash_table(new_size);
+    for (iterator runner = begin(); runner != end(); ++runner) {
+      new_hash_table.insert(*runner);
+    }
+    m_table = std::move(new_hash_table);
+  }
+  /*!
+   * Sets the number of buckets to the number needed to accommodate at least
+   * count elements without exceeding maximum load factor and rehashes the
+   * container, i.e. puts the elements into appropriate buckets
+   * \param count lower bound for the new capacity of the container.
+   */
+  void reserve(size_type count) {
+    rehash(std::ceil(count / max_load_factor()));
+  }
 
   template <class ListIt, class BucketIt> class HashIterator {};
 
