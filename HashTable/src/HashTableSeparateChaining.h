@@ -50,10 +50,16 @@ public:
   HashTable &operator=(std::initializer_list<value_type> ilist) {}
 
   ///=== [II] Iterators.
-  iterator begin() {}
-  iterator end() {}
-  const_iterator cbegin() {}
-  const_iterator cend() {}
+  iterator begin() { return iterator(m_table.begin(), m_table[0].begin()); }
+  iterator end() {
+    return iterator(--m_table.end(), m_table[m_table.size() - 1].end());
+  }
+  const_iterator cbegin() {
+    return const_iterator(m_table.cbegin(), m_table[0].cbegin());
+  }
+  const_iterator cend() {
+    return const_iterator(--m_table.cend(), m_table[m_table.size()].cend());
+  }
 
   ///=== [III] Capacity.
   bool empty() const { return m_size == 0; }
