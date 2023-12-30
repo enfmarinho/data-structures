@@ -66,14 +66,86 @@ public:
   size_type size() const { return m_size; }
 
   ///=== [IV] Modifiers.
-  void clear() {}
-  iterator insert(const_reference value) {}
-  template <typename InputIt> iterator insert(InputIt first, InputIt last) {}
-  iterator insert(std::initializer_list<value_type> ilist) {}
-  iterator erase(iterator pos) {}
-  template <typename InputIt> iterator erase(InputIt first, InputIt last) {}
-  size_type erase(const_reference key) {}
-  void merge(HashTable &other) {}
+  /// Empties the content of the container, i.e. removes all its elements.
+  void clear() {
+    for (list_type list : m_table) {
+      list.clear();
+    }
+    m_size = 0;
+  }
+  /*!
+   * Inserts the element "value" in the container.
+   * \param value element to insert.
+   * \return iterator to the inserted element.
+   */
+  iterator insert(const_reference value) {
+    ++m_size;
+    if (load_factor() > m_max_load_factor) {
+      rehash(find_next_prime(m_size));
+    }
+    size_type index = hash(value);
+    m_table[index].push_front(value);
+    return iterator(m_table.begin() + index, m_table[index].begin());
+  }
+  /*!
+   * Inserts all elements in the range [first, last) in the container.
+   * \param first beginning of the range.
+   * \param last end of the range (not included).
+   */
+  template <typename InputIt> void insert(InputIt first, InputIt last) {
+    reserve(m_size + std::distance(first, last));
+    for (; first != last; ++first) {
+      insert(*first);
+    }
+  }
+  /*!
+   * Inserts all elements in the initializer_list "ilist" in the container.
+   * \param ilist initializer_list containing the elements to insert.
+   */
+  void insert(std::initializer_list<value_type> ilist) {
+    reserve(m_size + ilist.size());
+    for (value_type element : ilist) {
+      insert(element);
+    }
+  }
+  /*!
+   * Removes the element being pointed by the iterator "pos".
+   * \param pos iterator pointing to the element to remove.
+   * \return iterator pointing to the element following the removed one.
+   */
+  iterator erase(iterator pos) {
+    iterator following_removed = pos + 1;
+    size_type index = hash(*pos);
+    m_table[index].erase(pos.m_bucket);
+    return following_removed;
+  }
+  // template must be iterator or constant iterator
+  template <typename InputIt> iterator erase(InputIt first, InputIt last) {
+    while (first != last) {
+      InputIt copy = first + 1;
+      size_type index = hash(*first);
+      m_table[index].erase(first.m_bucket);
+      first = copy;
+    }
+    return last;
+  }
+  size_type erase(const_reference key) {
+    size_type index = hash(key);
+    size_type counter{0};
+    for (auto runner = m_table[index].begin(); runner != m_table[index].end();
+         ++runner) {
+      if (key_equal{}(*runner, key)) {
+        m_table[index].erase(runner);
+        ++counter;
+      }
+    }
+    return counter;
+  }
+  void merge(HashTable &other) {
+    for (value_type element : other) {
+      insert(element);
+    }
+  }
 
   ///=== [V] Lookup.
   /*!
