@@ -36,18 +36,51 @@ public:
   using const_local_iterator = typename list_type::iterator;
 
   ///=== [I] Special Functions.
-  HashTable(size_type bucket_count = DEFAULT_SIZE) {}
+  HashTable(size_type bucket_count = DEFAULT_SIZE) {
+    m_table.resize(find_next_prime(bucket_count));
+  }
   template <typename InputIt>
   HashTable(InputIt first, InputIt last,
-            size_type bucket_count = DEFAULT_SIZE) {}
-  HashTable(const HashTable &other) {}
-  HashTable(HashTable &&other) {}
+            size_type bucket_count = DEFAULT_SIZE) {
+    m_table.resize(find_next_prime(bucket_count));
+    reserve(std::distance(first, last));
+    while (first != last) {
+      insert(*first);
+      ++first;
+    }
+  }
+  HashTable(const HashTable &other) { *this = other; }
+  HashTable(HashTable &&other) { *this = other; }
   HashTable(std::initializer_list<value_type> ilist,
-            size_type bucket_count = DEFAULT_SIZE) {}
+            size_type bucket_count = DEFAULT_SIZE) {
+    m_table.resize(find_next_prime(bucket_count));
+    *this = ilist;
+  }
   ~HashTable() = default;
-  HashTable &operator=(const HashTable &other) {}
-  HashTable &operator=(HashTable &&other) {}
-  HashTable &operator=(std::initializer_list<value_type> ilist) {}
+  HashTable &operator=(const HashTable &other) {
+    m_max_load_factor = other.m_max_load_factor;
+    clear();
+    reserve(other.size());
+    for (value_type element : other) {
+      insert(element);
+    }
+    return *this;
+  }
+  HashTable &operator=(HashTable &&other) {
+    m_table = std::move(other.m_table);
+    m_max_load_factor = other.m_max_load_factor;
+    m_size = other.m_size;
+    other.m_size = 0;
+    return *this;
+  }
+  HashTable &operator=(std::initializer_list<value_type> ilist) {
+    clear();
+    reserve(ilist.size());
+    for (value_type element : ilist) {
+      insert(element);
+    }
+    return *this;
+  }
 
   ///=== [II] Iterators.
   iterator begin() { return iterator(m_table.begin(), m_table[0].begin()); }
