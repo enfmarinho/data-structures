@@ -293,7 +293,67 @@ public:
     rehash(std::ceil(count / max_load_factor()));
   }
 
-  template <class ListIt, class BucketIt> class HashIterator {};
+  template <class TableIt, class BucketIt> class HashTableIterator {
+    HashTableIterator() = default;
+    HashTableIterator(TableIt table, BucketIt bucket)
+        : m_table(table), m_bucket(bucket) {}
+    HashTableIterator(const HashTableIterator &) = default;
+    ~HashTableIterator() = default;
+    value_type *operator*() const { return *m_bucket; }
+    const_reference operator&() const { return &m_bucket; }
+    HashTableIterator &operator++() {
+      if (++m_bucket == m_table->end()) {
+        m_bucket = (++m_table)->begin();
+      }
+      return *this;
+    }
+    HashTableIterator operator++(int) {
+      HashTableIterator copy = *this;
+      ++(*this);
+      return copy;
+    }
+    friend HashTableIterator operator+(HashTableIterator it,
+                                       size_type increment) {
+      HashTableIterator result = it;
+      for (size_type counter{0}; counter < increment; ++counter) {
+        ++result;
+      }
+      for (size_type counter{0}; counter > increment; --counter) {
+        --result;
+      }
+      return result;
+    }
+    friend HashTableIterator operator+(size_type increment,
+                                       HashTableIterator it) {
+      return it + increment;
+    }
+    HashTableIterator &operator--() {
+      if (m_bucket == m_table->begin()) {
+        m_bucket = --(--m_table)->end();
+      }
+      return *this;
+    }
+    HashTableIterator operator--(int) {
+      HashTableIterator copy = *this;
+      --(*this);
+      return copy;
+    }
+    friend HashTableIterator operator-(const HashTableIterator &it,
+                                       size_type decrement) {
+      return it + (-decrement);
+    }
+    HashTableIterator &operator=(const HashTableIterator &copy) {
+      m_table = copy.m_table;
+      m_bucket = copy.m_bucket;
+      return *this;
+    }
+    bool operator==(HashTableIterator rhs) { return m_bucket == rhs.m_bucket; }
+    bool operator!=(HashTableIterator rhs) { return m_bucket != rhs.m_bucket; }
+
+  protected:
+    TableIt m_table;   //!< Iterator to the table.
+    BucketIt m_bucket; //!< iterator to the bucket.
+  };
 
 private:
   /// Returns the index at which the element should be stored.
