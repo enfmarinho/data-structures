@@ -358,8 +358,67 @@ public:
 private:
   /// Returns the index at which the element should be stored.
   size_type hash(const_reference key) { return hasher{}(key) % m_table.size(); }
-  /// Returns the first prime greater or equal to "number".
-  size_type get_prime(size_type number) {}
+  /// Returns the first prime greater or equal than "number".
+  static size_type find_next_prime(size_type number) {
+    // For numbers smaller than 318,665,857,834,031,151,167,461 these
+    // witnesses are enough to determine the primarily using the Miller-Robin
+    // algorithm.
+    std::vector<int> witnesses{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37};
+    while (not miller_rabin(number, witnesses)) {
+      ++number;
+    }
+    return number;
+  }
+  /*!
+   * Performs the Miller-Robin primarily test to check if "number" is prime
+   * using the bases in "witnesses".
+   * \param number number to check whether it is prime.
+   * \param witnesses witnesses to use as bases in calculation.
+   */
+  static bool miller_rabin(const size_type &number,
+                           const std::vector<int> &witnesses) {
+    using u128 = __uint128_t;
+    if (number < 2) {
+      return false;
+    }
+    int shifts = __builtin_ctzll(number - 1);
+    long long power = number >> shifts;
+    for (int witness : witnesses) {
+      if (number == witness) {
+        return true;
+      }
+      long long pow = binary_exponentiation(witness, power, number);
+      long long counter = shifts;
+      while (pow != 1 and pow != number - 1 and witness % number and
+             counter--) {
+        pow = (u128)pow * pow % number;
+      }
+      if (pow != number - 1 and counter != shifts) {
+        return false;
+      }
+    }
+    return true;
+  }
+  /*!
+   * Performs a binary exponentiation.
+   * \param base base of the calculation.
+   * \param power exponent of the calculation.
+   * \param mod limit value of result.
+   * \return result of the exponentiation module "mod".
+   */
+  static size_type binary_exponentiation(size_type base, size_type power,
+                                         size_type mod) {
+    base %= mod;
+    size_type result = 1;
+    while (power > 0) {
+      if (power & 1) {
+        result = result * base % mod;
+      }
+      base = base * base % mod;
+      power >>= 1;
+    }
+    return result;
+  }
 
   std::vector<list_type> m_table; //!< Scatter table.
   size_type m_size{0};            //!< Number of elements in the container.
