@@ -4,7 +4,7 @@
 #include <cstddef>    // size_t, ptrdiff_t
 #include <functional> // less
 #include <initializer_list>
-#include <utility> // swap
+#include <utility> // swap, move
 #include <vector>
 
 // Namespace for tree data-structures.
@@ -57,7 +57,7 @@ public:
    * invalid after operation.
    * \param other heap to move from.
    */
-  Heap(Heap &&other) { *this = other; }
+  Heap(Heap &&other) { *this = std::move(other); }
   /// Deallocates heap memory.
   ~Heap() = default;
   /*!
