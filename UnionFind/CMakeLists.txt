@@ -21,4 +21,4 @@ target_link_libraries(
   union_find_test
   PRIVATE ${GTEST_LIBRARIES}
   PRIVATE pthread)
-target_compile_features(executable PUBLIC cxx_std_17)
+target_compile_features(union_find_test PUBLIC cxx_std_17)

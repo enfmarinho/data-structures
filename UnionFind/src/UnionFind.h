@@ -13,10 +13,10 @@ namespace tree {
  *
  * \author Eduardo Marinho (eduardo.nestor.marinho228@gmail.com)
  */
-template <typename T> class UnionFind {
+class UnionFind {
 public:
   //=== Aliases.
-  using value_type = T;
+  using value_type = long long int;
   using pointer = value_type *;
   using const_pointer = const value_type *;
   using reference = value_type &;
@@ -60,8 +60,8 @@ public:
    * \return reference to this container.
    */
   UnionFind &operator=(UnionFind &&other) {
-    m_size = std::move(other.m_size);
-    m_number_of_groups = std::move(other.m_number_of_groups);
+    std::swap(m_size, other.m_size);
+    std::swap(m_number_of_groups, other.m_number_of_groups);
     m_group_id = std::move(other.m_group_id);
     m_groups_size = std::move(other.m_groups_size);
     return *this;
@@ -89,7 +89,7 @@ public:
   /// Consults the number of different groups in the container.
   size_type groups() const { return m_number_of_groups; }
   /// Consults the size of the group under the identifier "id".
-  size_type group_size(const_reference id) const { return m_groups_size[id]; }
+  size_type group_size(const_reference id) { return m_groups_size[find(id)]; }
 
   ///=== [V] Modifiers.
   /*!
@@ -98,7 +98,7 @@ public:
    * \param id1 id of the group to join.
    * \param id2 id of the other group to join.
    */
-  void unite(const_reference id1, const_reference id2) {
+  void unite(value_type id1, value_type id2) {
     id1 = find(id1);
     id2 = find(id2);
     if (id1 == id2) {
@@ -119,7 +119,7 @@ public:
 
 private:
   size_type m_size{0};                //!< Number of elements in the container.
-  size_type m_number_of_groups;       //!< Number of groups in the container.
+  size_type m_number_of_groups{0};    //!< Number of groups in the container.
   std::vector<value_type> m_group_id; //!< Group id of each element.
   std::vector<value_type> m_groups_size; //!< Sizes of each group
 };
