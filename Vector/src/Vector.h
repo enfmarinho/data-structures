@@ -1,11 +1,17 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include <cstddef> // size_t, ptrdiff_t
 #include <initializer_list>
-#include <iterator>
+#include <iterator> // distance
 
 // Namespace for sequential containers(sc).
 namespace sc {
+/*!
+ * Implementation of a vector data structure.
+ *
+ * \author Eduardo Marinho (eduardo.nestor.marinho228@gmail.com)
+ */
 template <typename T> class vector {
 public:
   // Forward declaration.
