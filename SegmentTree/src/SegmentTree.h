@@ -3,8 +3,34 @@
 
 #include <cstddef>    // size_t, ptrdiff_t
 #include <functional> // function
+#include <limits>     // numeric_limits
 #include <utility>    // move
 #include <vector>
+
+namespace operations {
+template <class T> struct Sum {
+  T operator()(const T &lhs, const T &rhs) { return lhs + rhs; }
+  static T neutral_element() { return 0; }
+};
+template <class T> struct Max {
+  T operator()(const T &lhs, const T &rhs) {
+    if (lhs > rhs) {
+      return lhs;
+    }
+    return rhs;
+  }
+  static T neutral_element() { return std::numeric_limits<T>::min(); }
+};
+template <class T> struct Min {
+  T operator()(const T &lhs, const T &rhs) {
+    if (lhs < rhs) {
+      return lhs;
+    }
+    return rhs;
+  }
+  static T neutral_element() { return std::numeric_limits<T>::max(); }
+};
+}; // namespace operations
 
 // Namespace for tree data-structures.
 namespace tree {
