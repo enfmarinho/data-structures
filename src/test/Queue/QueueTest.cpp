@@ -1,4 +1,4 @@
-#include "../src/Queue.h"
+#include "Queue/Queue.h"
 #include "gtest/gtest.h"
 #include <initializer_list>
 #include <list>

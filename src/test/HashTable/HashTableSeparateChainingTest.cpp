@@ -1,4 +1,4 @@
-#include "../src/HashTableSeparateChaining.h"
+#include "HashTable/HashTableSeparateChaining.h"
 #include "gtest/gtest.h"
 #include <initializer_list>
 #include <set>

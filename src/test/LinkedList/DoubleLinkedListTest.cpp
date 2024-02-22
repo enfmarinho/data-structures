@@ -1,4 +1,4 @@
-#include "../src/DoubleLinkedList.h"
+#include "LinkedList/DoubleLinkedList.h"
 #include "gtest/gtest.h"
 #include <cstddef>    // size_t
 #include <functional> // function<>, greater<>, less<>

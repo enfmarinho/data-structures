@@ -1,4 +1,4 @@
-#include "../src/Vector.h"
+#include "Vector/Vector.h"
 #include "gtest/gtest.h"
 #include <initializer_list>
 #include <vector>

@@ -1,4 +1,4 @@
-#include "../src/UnionFind.h"
+#include "UnionFind/UnionFind.h"
 #include "gtest/gtest.h"
 #include <utility> // move
 

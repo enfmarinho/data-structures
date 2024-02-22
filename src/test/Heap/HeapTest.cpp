@@ -1,4 +1,4 @@
-#include "../src/Heap.h"
+#include "Heap/Heap.h"
 #include "gtest/gtest.h"
 #include <deque>
 #include <functional> // less, greater
