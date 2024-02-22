@@ -1,6 +1,4 @@
-# Executables
 a.out
 *.exe
 build
-# File that contains a workaround to a "bug" in my LSP.
-compile_flags.txt
+.cache
