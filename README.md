@@ -41,7 +41,7 @@ generated for BinarySearchTreeTest.cpp is named binary_search_tree_test.
 
 # Implemented data structures
 
--[[[INCOMPLETE]]] [Binary search tree](src/include/BinarySearchTree/BinarySearchTree.h)
+- [INCOMPLETE] [Binary search tree](src/include/BinarySearchTree/BinarySearchTree.h)
 - [Hash table](src/include/HashTable/HashTableSeparateChaining.h)
 - [Heap](src/include/Heap/Heap.h)
 - [Linked list](src/include/LinkedList/DoubleLinkedList.h)
