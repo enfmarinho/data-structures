@@ -1,10 +1,13 @@
 #ifndef HASH_TABLE_SEPARATE_CHAINING_H
 #define HASH_TABLE_SEPARATE_CHAINING_H
 
-#include <cstddef> // size_t, ptrdiff_t
-#include <forward_list>
-#include <functional> //equal_to
+#include <cmath>      // ceil
+#include <cstddef>    // size_t, ptrdiff_t
+#include <functional> // equal_to, hash
 #include <initializer_list>
+#include <iterator> // distance
+#include <list>
+#include <utility> // move
 #include <vector>
 
 // Namespace for associative containers(ac).
@@ -17,23 +20,25 @@ template <class KeyType, class KeyHash = std::hash<KeyType>,
 class HashTable {
 public:
   // Forward declaration.
-  template <class ListIt, class BucketIt> class HashIterator;
+  template <class ListIt, class BucketIt> class HashTableIterator;
   //=== Aliases.
   using value_type = KeyType;
-  using list_type = std::forward_list<value_type>;
+  using list_type = std::list<value_type>;
+  using table_type = std::vector<list_type>;
   using size_type = size_t;
   using difference_type = std::ptrdiff_t;
   using hasher = KeyHash;
   using key_equal = KeyEqual;
+  using pointer = KeyType *;
+  using const_pointer = const KeyType *;
   using reference = KeyType &;
   using const_reference = const KeyType &;
-  using iterator = HashIterator<typename std::vector<list_type>::iterator,
-                                typename list_type::iterator>;
-  using const_iterator =
-      HashIterator<typename std::vector<list_type>::const_iterator,
-                   typename list_type::const_iterator>;
+  using iterator = HashTableIterator<typename table_type::iterator,
+                                     typename list_type::iterator>;
+  using const_iterator = HashTableIterator<typename table_type::const_iterator,
+                                           typename list_type::const_iterator>;
   using local_iterator = typename list_type::iterator;
-  using const_local_iterator = typename list_type::iterator;
+  using const_local_iterator = typename list_type::const_iterator;
 
   ///=== [I] Special Functions.
   HashTable(size_type bucket_count = DEFAULT_SIZE) {
@@ -43,14 +48,10 @@ public:
   HashTable(InputIt first, InputIt last,
             size_type bucket_count = DEFAULT_SIZE) {
     m_table.resize(find_next_prime(bucket_count));
-    reserve(std::distance(first, last));
-    while (first != last) {
-      insert(*first);
-      ++first;
-    }
+    insert(first, last);
   }
   HashTable(const HashTable &other) { *this = other; }
-  HashTable(HashTable &&other) { *this = other; }
+  HashTable(HashTable &&other) { *this = std::move(other); }
   HashTable(std::initializer_list<value_type> ilist,
             size_type bucket_count = DEFAULT_SIZE) {
     m_table.resize(find_next_prime(bucket_count));
@@ -58,8 +59,8 @@ public:
   }
   ~HashTable() = default;
   HashTable &operator=(const HashTable &other) {
-    m_max_load_factor = other.m_max_load_factor;
     clear();
+    m_max_load_factor = other.m_max_load_factor;
     reserve(other.size());
     for (value_type element : other) {
       insert(element);
@@ -75,23 +76,41 @@ public:
   }
   HashTable &operator=(std::initializer_list<value_type> ilist) {
     clear();
-    reserve(ilist.size());
-    for (value_type element : ilist) {
-      insert(element);
-    }
+    insert(ilist);
     return *this;
   }
 
   ///=== [II] Iterators.
-  iterator begin() { return iterator(m_table.begin(), m_table[0].begin()); }
+  const_iterator begin() const { return cbegin(); }
+  iterator begin() {
+    for (typename table_type::iterator it = m_table.begin();
+         it != m_table.end(); ++it) {
+      if (it->begin() != it->end()) {
+        return iterator(m_table.begin(), m_table.end(), it, it->begin());
+      }
+    }
+    return end();
+  }
+  const_iterator end() const { return cend(); }
   iterator end() {
-    return iterator(--m_table.end(), m_table[m_table.size() - 1].end());
+    typename table_type::iterator m_table_end = m_table.end();
+    return iterator(m_table.begin(), m_table_end, m_table_end,
+                    (--m_table_end)->end());
   }
-  const_iterator cbegin() {
-    return const_iterator(m_table.cbegin(), m_table[0].cbegin());
+  const_iterator cbegin() const {
+    for (typename table_type::const_iterator it = m_table.cbegin();
+         it != m_table.cend(); ++it) {
+      if (it->cbegin() != it->cend()) {
+        return const_iterator(m_table.cbegin(), m_table.cend(), it,
+                              it->cbegin());
+      }
+    }
+    return cend();
   }
-  const_iterator cend() {
-    return const_iterator(--m_table.cend(), m_table[m_table.size()].cend());
+  const_iterator cend() const {
+    typename table_type::const_iterator m_table_cend = m_table.cend();
+    return const_iterator(m_table.cbegin(), m_table_cend, m_table_cend,
+                          (--m_table_cend)->cend());
   }
 
   ///=== [III] Capacity.
@@ -118,7 +137,8 @@ public:
     }
     size_type index = hash(value);
     m_table[index].push_front(value);
-    return iterator(m_table.begin() + index, m_table[index].begin());
+    return iterator(m_table.begin(), m_table.end(), m_table.begin() + index,
+                    m_table[index].begin());
   }
   /*!
    * Inserts all elements in the range [first, last) in the container.
@@ -229,8 +249,8 @@ public:
   /*!
    * Checks if the container has a element equivalent to "key".
    * \param key element to look for.
-   * \return flag that indicates whether the container has a element equivalent
-   *         to "key".
+   * \return flag that indicates whether the container has a element
+   * equivalent to "key".
    */
   bool contains(const_reference key) const {
     size_type index = hash(key);
@@ -246,11 +266,11 @@ public:
   local_iterator begin(const size_type &index) {
     return m_table[index].begin();
   }
-  const_local_iterator cbegin(const size_type &index) {
+  const_local_iterator cbegin(const size_type &index) const {
     return m_table[index].cbegin();
   }
   local_iterator end(const size_type &index) { return m_table[index].end(); }
-  const_local_iterator cend(const size_type &index) {
+  const_local_iterator cend(const size_type &index) const {
     return m_table[index].cend();
   }
   size_type bucket_count() const { return m_table.size(); }
@@ -261,15 +281,15 @@ public:
 
   ///=== [VII] Hash Policy.
   /// Calculates the average number of elements per bucket
-  float load_factor() const { return size() / (float)bucket_count(); }
+  float load_factor() const { return m_table.size() / (float)bucket_count(); }
   /// Returns the current max load factor.
   float max_load_factor() const { return m_max_load_factor; }
   /// Sets the maximum load factor to "load_factor".
   void max_load_factor(float load_factor) { m_max_load_factor = load_factor; }
   /*!
-   * Changes the number of buckets to a value n that is not less than count and
-   * satisfies n >= size() / max_load_factor(), then rehashes the container,
-   * i.e. puts the elements into appropriate buckets.
+   * Changes the number of buckets to a value n that is not less than count
+   * and satisfies n >= size() / max_load_factor(), then rehashes the
+   * container, i.e. puts the elements into appropriate buckets.
    * \param count lower bound for the new number of buckets.
    */
   void rehash(size_type count) {
@@ -281,7 +301,7 @@ public:
     for (iterator runner = begin(); runner != end(); ++runner) {
       new_hash_table.insert(*runner);
     }
-    m_table = std::move(new_hash_table);
+    *this = std::move(new_hash_table);
   }
   /*!
    * Sets the number of buckets to the number needed to accommodate at least
@@ -294,16 +314,26 @@ public:
   }
 
   template <class TableIt, class BucketIt> class HashTableIterator {
+  public:
     HashTableIterator() = default;
-    HashTableIterator(TableIt table, BucketIt bucket)
-        : m_table(table), m_bucket(bucket) {}
+    HashTableIterator(TableIt table_begin, TableIt table_end, TableIt table,
+                      BucketIt bucket)
+        : m_table_begin{table_begin}, m_table_end{table_end}, m_table(table),
+          m_bucket(bucket) {}
     HashTableIterator(const HashTableIterator &) = default;
+    HashTableIterator &operator=(const HashTableIterator &copy) = default;
     ~HashTableIterator() = default;
-    value_type *operator*() const { return *m_bucket; }
-    const_reference operator&() const { return &m_bucket; }
+    value_type operator*() { return *m_bucket; }
+    reference operator&() { return &m_bucket; }
+    pointer operator->() const { return &(*m_bucket); }
     HashTableIterator &operator++() {
-      if (++m_bucket == m_table->end()) {
-        m_bucket = (++m_table)->begin();
+      ++m_bucket;
+      while (m_bucket == m_table->end() and m_table != m_table_end) {
+        if (++m_table == m_table_end) {
+          m_bucket = (m_table - 1)->end();
+          break;
+        }
+        m_bucket = m_table->begin();
       }
       return *this;
     }
@@ -328,8 +358,14 @@ public:
       return it + increment;
     }
     HashTableIterator &operator--() {
-      if (m_bucket == m_table->begin()) {
-        m_bucket = --(--m_table)->end();
+      if (m_bucket != m_table->begin()) {
+        --m_bucket;
+      } else {
+        m_bucket = --(--m_table.end());
+        while (m_table->begin() == m_table->end() and
+               m_table != m_table_begin) {
+          m_bucket = --(--m_table)->end();
+        }
       }
       return *this;
     }
@@ -342,22 +378,22 @@ public:
                                        size_type decrement) {
       return it + (-decrement);
     }
-    HashTableIterator &operator=(const HashTableIterator &copy) {
-      m_table = copy.m_table;
-      m_bucket = copy.m_bucket;
-      return *this;
+    bool operator==(const HashTableIterator &rhs) {
+      return m_bucket == rhs.m_bucket;
     }
-    bool operator==(HashTableIterator rhs) { return m_bucket == rhs.m_bucket; }
-    bool operator!=(HashTableIterator rhs) { return m_bucket != rhs.m_bucket; }
+    bool operator!=(const HashTableIterator &rhs) { return not(*this == rhs); }
 
-  protected:
-    TableIt m_table;   //!< Iterator to the table.
-    BucketIt m_bucket; //!< iterator to the bucket.
+  private:
+    TableIt m_table_begin; //!<  Iterator to the begin of the table.
+    TableIt m_table_end;   //!< Iterator to the end of the table.
+    TableIt m_table;       //!< Iterator to the table.
+    BucketIt m_bucket;     //!< iterator to the bucket.
   };
 
-private:
   /// Returns the index at which the element should be stored.
-  size_type hash(const_reference key) { return hasher{}(key) % m_table.size(); }
+  size_type hash(const_reference key) const {
+    return hasher{}(key) % m_table.size();
+  }
   /// Returns the first prime greater or equal than "number".
   static size_type find_next_prime(size_type number) {
     // For numbers smaller than 318,665,857,834,031,151,167,461 these
@@ -420,6 +456,7 @@ private:
     return result;
   }
 
+private:
   std::vector<list_type> m_table; //!< Scatter table.
   size_type m_size{0};            //!< Number of elements in the container.
   float m_max_load_factor{1.0};   //!< Max load factor.
