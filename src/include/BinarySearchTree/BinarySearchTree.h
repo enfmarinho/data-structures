@@ -1,15 +1,17 @@
 #ifndef BST_H
 #define BST_H
 
-#include <cstddef>    // size_t, ptrdiff_t
-#include <functional> // greater<>, greater_equal<>
+#include <cstddef> // size_t, ptrdiff_t
 #include <initializer_list>
-#include <utility> // swap()
+#include <limits>  // numeric_limits
+#include <utility> // swap
 
 // Namespace for tree data-structures.
 namespace tree {
 /*!
- * TODO document.
+ * Binary search tree data structure. Important: not self balancing, just a
+ * simple implementation.
+ * \template T data type to store.
  */
 template <typename T> class BST {
 public:
@@ -24,7 +26,6 @@ public:
   using const_reference = const value_type &;
   using size_type = size_t;
   using difference_type = std::ptrdiff_t;
-  using compare_function = std::function<bool(value_type, value_type)>;
   using node_pointer = Node *;
   using const_node_pointer = const Node *;
 
@@ -45,37 +46,34 @@ public:
 public:
   //=== [I] Special Functions.
   BST() = default;
-  BST(std::initializer_list<value_type> ilist) { assing(ilist); }
-  template <typename Itr> BST(Itr begin, Itr end) { assing(begin, end); }
-  BST(const BST &clone) {
-    for (auto runner = clone.begin(); runner != clone.end(); ++runner) {
-      insert(*runner);
+  BST(std::initializer_list<value_type> ilist) {
+    clear();
+    for (value_type value : ilist) {
+      insert(value);
     }
   }
-  BST(BST &&source) noexcept {
-    m_size = source.size();
-    std::swap(m_root, source.m_root);
-    std::swap(m_greatest, source.m_greatest);
-    std::swap(m_smallest, source.m_smallest);
-  }
-  ~BST() { clear(); }
-  template <typename Itr> void assing(Itr begin, Itr end) {
+  template <typename Itr> BST(Itr begin, Itr end) {
     clear();
     for (; begin != end; ++begin) {
       insert(*begin);
     }
   }
-
-  void assing(std::initializer_list<value_type> ilist) {
-    clear();
-    for (auto value : ilist) {
-      insert(value);
+  BST(BST &clone) {
+    for (iterator runner = clone.begin(); runner != clone.end(); ++runner) {
+      insert(*runner);
     }
   }
+  BST(BST &&source) noexcept {
+    std::swap(m_size, source.m_size);
+    std::swap(m_root, source.m_root);
+    std::swap(m_end, source.m_end);
+    std::swap(m_smallest, source.m_smallest);
+  }
+  ~BST() { clear(); }
 
   //=== [II] ITERATORS.
   iterator begin() { return iterator(m_smallest); }
-  iterator end() { return iterator(m_greatest); }
+  iterator end() { return iterator(m_end); }
 
   //=== [III] Capacity.
   [[nodiscard]] bool empty() const { return m_size == 0; }
@@ -83,19 +81,14 @@ public:
 
   //=== [IV] MODIFIERS
   /// Removes all elements in the container.
-  // TODO
   void clear() {
     if (m_root == nullptr) {
       return;
     }
-    iterator runner = begin();
-    iterator end = end();
-    while (runner != end) {
-      iterator copy = runner + 1;
-      delete &runner;
-      runner = copy;
-    }
+    clear_helper(&m_root);
     m_root = nullptr;
+    m_end = nullptr;
+    m_smallest = nullptr;
     m_size = 0;
   }
   /*!
@@ -103,75 +96,122 @@ public:
    * \param value data to insert.
    * \return iterator pointing to inserted data.
    */
-  // TODO check border cases.
   iterator insert(const_reference value) {
+    ++m_size;
     iterator runner(m_root);
-    node_pointer parent = nullptr;
+    iterator parent;
     while (runner != nullptr) {
-      parent = runner.get_parent();
+      parent = runner;
       runner.next(value);
     }
-    node_pointer new_node = new Node(value, parent);
+    node_pointer new_node = new Node(value, &parent);
     if (parent == nullptr) { // tree empty
       m_root = new_node;
+      new_node->right_child =
+          new Node(std::numeric_limits<value_type>::max(), new_node);
     } else if (value < *parent) {
-      parent->left_child = new_node;
+      (&parent)->left_child = new_node;
     } else {
-      parent->right_child = new_node;
+      (&parent)->right_child = new_node;
     }
 
-    if (m_greatest != nullptr and value > *m_greatest) {
-      m_greatest = new_node;
-    } else if (m_smallest != nullptr and value < *m_smallest) {
+    if (m_end == nullptr and m_smallest == nullptr) {
+      m_end = new_node->right_child;
+      m_smallest = new_node;
+    } else if (value >= *m_end) {
+      m_end = new_node;
+    } else if (value <= *m_smallest) {
       m_smallest = new_node;
     }
     return iterator(new_node);
   }
   /*!
-   * Removes all elements in the container that are equivalent to "key".
+   * Removes the first occurrence of a element equivalent to "key", if there are
+   * any, otherwise does nothing. Uses the operator==().
    * \param key element to remove.
+   * \return boolean representing whether or not a element was removed.
    */
-  void erase(const_reference key) {
-    iterator it{m_root};
-    while (it != nullptr and it->key != key) {
-      it.next(key);
+  bool erase(const_reference key) {
+    iterator runner{m_root};
+    while (runner != nullptr and (&runner)->key != key) {
+      runner.next(key);
     }
-    if (it != nullptr) {
-      iterator parent = it.get_parent();
-      while (it != nullptr and it == key) {
-      }
-      // Guarantee that all nodes equivalent to key are deleted. Not only one.
-    }
+    return erase(runner);
   }
-
-  //=== [V] Lookup.
-  size_type count(const_reference key) {}
   /*!
-   * Finds the first occurrence of the elements "key" in the container.
-   * \param key element to look for.
-   * \return iterator pointing to the element, if it was found or end().
+   * Removes the element being pointed by the iterator "it".
+   * \param it iterator pointing to the element to remove.
+   * \return boolean representing whether or not a element was removed.
    */
-  iterator find(const_reference key) {}
-  iterator search(const_reference key, compare_function compare,
-                  std::function<void(iterator &)> traverse_method) {
-    iterator it(m_root);
-    while (it != nullptr) {
-      if (compare(it, key)) {
-        return iterator(it);
-      }
-      traverse_method(it);
+  bool erase(iterator it) {
+    if (it == nullptr or it == m_end) {
+      return false;
     }
-    return end();
-  }
 
-  iterator upper_bound(const T &key) {
-    return search(key, std::greater<T>(), iterator::goto_right());
-  }
-  iterator lower_bound(const T &key) {
-    return search(key, std::greater_equal<T>(), iterator::goto_right());
-  }
-  iterator first_smaller(const_reference key) {
-    return search(key, std::less<T>(), iterator::goto_left());
+    if (it == m_smallest) {
+      if ((&m_smallest)->right_child != nullptr) {
+        m_smallest = (&m_smallest)->right_child;
+        while ((&m_smallest)->left_child != nullptr) {
+          m_smallest = (&m_smallest)->left_child;
+        }
+      } else {
+        m_smallest = it.get_parent();
+      }
+    }
+
+    Node *parent = &it.get_parent();
+    Node *substitute = (&it)->right_child;
+    Node *save = nullptr;
+    if (substitute != nullptr and substitute->left_child == nullptr) {
+      save = substitute;
+      substitute->parent = parent;
+      substitute->left_child = (&it)->left_child;
+      if ((&it)->left_child != nullptr) {
+        (&it)->left_child->parent = substitute;
+      }
+    } else if (substitute != nullptr) {
+      while (substitute->left_child != nullptr) {
+        substitute = substitute->left_child;
+      }
+      if (substitute->right_child != nullptr) {
+        substitute->right_child->parent = substitute->parent;
+        substitute->parent->left_child = substitute->right_child;
+      }
+      substitute->right_child = (&it)->right_child;
+      substitute->left_child = (&it)->left_child;
+      if ((&it)->right_child != nullptr) {
+        (&it)->right_child->parent = substitute;
+      }
+      if ((&it)->left_child != nullptr) {
+        (&it)->left_child->parent = substitute;
+      }
+      save = substitute;
+    } else if (parent == nullptr) {
+      m_root = (&it)->left_child;
+      if ((&it)->left_child != nullptr) {
+        (&it)->left_child->parent = nullptr;
+      } else {
+        m_smallest = m_end;
+      }
+    } else if ((&it)->left_child != nullptr) {
+      save = (&it)->left_child;
+      (&it)->left_child->parent = parent;
+    }
+
+    if (parent != nullptr) {
+      if (*it < parent->key) {
+        parent->left_child = save;
+      } else {
+        parent->right_child = save;
+      }
+    }
+    --m_size;
+    if (m_size == 0) {
+      m_smallest = m_end;
+      m_root = nullptr;
+    }
+    delete &it;
+    return true;
   }
 
   class iterator {
@@ -180,11 +220,16 @@ public:
     using iterator_reference = iterator &;
 
     /// Default constructor.
-    iterator(Node *ptr = nullptr) { this->m_pointer = ptr; }
+    iterator(node_pointer ptr = nullptr) { this->m_pointer = ptr; }
     /// Copy constructor.
     iterator(const iterator &copy) { this->m_pointer = copy.m_pointer; }
     /// Destructor.
     ~iterator() = default;
+    iterator &operator=(const iterator &) = default;
+    iterator &operator=(Node *pointer) {
+      m_pointer = pointer;
+      return *this;
+    }
     /// Dereference operator.
     reference operator*() { return m_pointer->key; }
     /// Constant dereference operator.
@@ -198,81 +243,119 @@ public:
     /// Constant arrow operator.
     const_pointer operator->() const { return &(m_pointer->key); }
     /// Consults node parent.
-    node_pointer *get_parent() { return m_pointer->parent; }
-    /// Goes to right node.
-    iterator goto_right() {
-      m_pointer = m_pointer->right_child;
-      return iterator(m_pointer);
-    }
-    /// Goes to left node.
-    iterator goto_left() {
-      m_pointer = m_pointer->left_child;
-      return iterator(m_pointer);
-    }
-    /// Goes to the parent node.
-    iterator goto_parent() {
-      m_pointer = m_pointer->parent;
-      return iterator(m_pointer);
-    }
-    /// Goes to the right node.
-    friend void goto_right(iterator &it) { return it.goto_right(); }
-    /// Goes to left node.
-    friend void goto_left(iterator &it) { return it.goto_left(); }
-    /// Goes in the direction of the key.
+    iterator get_parent() { return iterator(m_pointer->parent); }
+    // /// Goes in the direction of the key.
     iterator next(const_reference key) {
       if (key < m_pointer->key) {
-        goto_left();
+        m_pointer = m_pointer->left_child;
       } else {
-        goto_right();
+        m_pointer = m_pointer->right_child;
       }
+      return iterator(m_pointer);
     }
-    /// Goes to next node.
-    iterator next() {
+    /// Goes to next node. If there is no next node, does nothing.
+    iterator operator++() {
       if (m_pointer->right_child != nullptr) {
-        goto_right();
+        m_pointer = m_pointer->right_child;
+        while (m_pointer->left_child != nullptr) {
+          m_pointer = m_pointer->left_child;
+        }
       } else {
-        node_pointer parrent = get_parent();
-        while (parrent != nullptr) {
-          if (m_pointer == parrent->left_child) {
-            goto_parent();
+        Node *parent = m_pointer->parent;
+        Node *runner = m_pointer;
+        while (parent != nullptr) {
+          if (runner == parent->left_child) {
+            m_pointer = parent;
             break;
           }
-          goto_parent();
+          runner = runner->parent;
+          parent = runner->parent;
         }
       }
+      return iterator(m_pointer);
     }
-    /// Goes to previous node.
-    iterator previous() {}
     /// Goes to the next node.
-    iterator operator++() { return next(); }
-    /// Goes to the next node.
-    iterator operator++(int) { return next(); }
-    /// Goes to previous node.
-    iterator operator--() { return previous(); }
+    iterator operator++(int) {
+      Node *copy = m_pointer;
+      ++(*this);
+      return iterator(copy);
+    }
+    /// Goes to previous node. If there is no previous node, does nothing.
+    iterator operator--() {
+      if (m_pointer->left_child != nullptr) {
+        m_pointer = m_pointer->left_child;
+        while (m_pointer->right_child != nullptr) {
+          m_pointer = m_pointer->right_child;
+        }
+      } else {
+        Node *parent = m_pointer->parent;
+        Node *runner = m_pointer;
+        while (parent != nullptr) {
+          if (runner == parent->right_child) {
+            m_pointer = parent;
+            break;
+          }
+          runner = runner->parent;
+          parent = runner->parent;
+        }
+      }
+      return iterator(m_pointer);
+    }
     /// Goes to previous node and return a copy of this before operation.
     iterator operator--(int) {
       auto copy = m_pointer;
-      previous();
+      ++(*this);
       return iterator(copy);
     }
-    /// Checks whether two iterators are different.
-    bool operator!=(iterator_reference other) {
-      return m_pointer != other.m_pointer;
-    }
     /// Checks whether two iterators are equivalent.
-    bool operator==(iterator_reference other) {
-      return m_pointer == other.m_pointer;
+    friend bool operator==(const iterator &lhs, const iterator &rhs) {
+      return lhs.m_pointer == rhs.m_pointer;
+    }
+    friend bool operator==(const iterator &lhs, node_pointer rhs) {
+      return lhs.m_pointer == rhs;
+    }
+    /// Checks whether two iterators are different.
+    friend bool operator!=(const iterator &lhs, const iterator &rhs) {
+      return !(lhs == rhs);
+    }
+    friend bool operator!=(iterator lhs, node_pointer pointer) {
+      return !(lhs == pointer);
+    }
+    friend iterator operator+(iterator it, difference_type increment) {
+      for (difference_type counter{0}; counter < increment; ++counter) {
+        ++it;
+      }
+      for (difference_type counter{0}; counter > increment; --counter) {
+        --it;
+      }
+      return it;
+    }
+    friend iterator operator+(difference_type increment, const iterator &it) {
+      return it + increment;
+    }
+    friend iterator operator-(const iterator &it, difference_type decrement) {
+      return it + (-decrement);
     }
 
   private:
-    Node *m_pointer; //!< Pointer to a node.
+    node_pointer m_pointer; //!< Pointer to a node.
   };
 
 private:
+  void clear_helper(node_pointer node) {
+    if (node->left_child != nullptr) {
+      clear_helper(node->left_child);
+    }
+    if (node->right_child != nullptr) {
+      clear_helper(node->right_child);
+    }
+    delete node;
+  }
+
   size_type m_size{0}; //!< Number of elements in the tree.
   iterator m_root;     //!< Iterator to the tree root.
   iterator m_smallest; //!< Iterator to smallest element in the tree.
-  iterator m_greatest; //!< Iterator to greatest element in the tree.
+  iterator m_end;      //!< Iterator to the end of the tree.
 };
 } // namespace tree
 
