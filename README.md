@@ -25,12 +25,12 @@ cmake --build build
 ```
 ## Running
 
-If you choose to everything at once, the executable files are store at 
-build/bin, so just run: 
+If you chose to compile everything at once, the executable files are store at 
+the directory build/bin, so just run: 
 ```bash
 ./build/bin/NAME
 ```
-If you compile just a specific test, the executable will be stored at the build
+If you compiled just a specific test, the executable will be stored at the build
 directory, so just run:
 ```bash
 ./build/NAME
@@ -41,7 +41,7 @@ generated for BinarySearchTreeTest.cpp is named binary_search_tree_test.
 
 # Implemented data structures
 
-- [INCOMPLETE] [Binary search tree](src/include/BinarySearchTree/BinarySearchTree.h)
+- [Binary search tree](src/include/BinarySearchTree/BinarySearchTree.h)
 - [Hash table](src/include/HashTable/HashTableSeparateChaining.h)
 - [Heap](src/include/Heap/Heap.h)
 - [Linked list](src/include/LinkedList/DoubleLinkedList.h)
