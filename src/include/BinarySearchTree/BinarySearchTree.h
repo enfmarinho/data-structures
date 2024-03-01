@@ -259,12 +259,13 @@ public:
       m_pointer = pointer;
       return *this;
     }
-    /// Dereference operator.
-    reference operator*() { return m_pointer->key; }
     /// Constant dereference operator.
     const_reference operator*() const { return m_pointer->key; }
     /// Consults the pointer to the node.
-    node_pointer operator&() { return m_pointer; }
+    node_pointer operator&() {
+      // TODO this function should be removed as it breaks the encapsulation
+      return m_pointer;
+    }
     /// Consults the pointer to the node.
     const_node_pointer operator&() const { return m_pointer; }
     /// Arrow operator.
