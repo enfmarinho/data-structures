@@ -1,7 +1,7 @@
 #ifndef STACK_H
 #define STACK_H
 
-#include <cstddef> // size_t
+#include <cstddef> // size_t, ptrdiff_t
 #include <deque>
 #include <initializer_list>
 
@@ -14,6 +14,8 @@ namespace sc {
  * \tparam Container type of the underlying container to store the data. The
  *         container must satisfy the requirements of a Sequence Container.
  *         Default = std::deque.
+ *
+ * \author Eduardo Marinho (eduardo.nestor.marinho228@gmail.com)
  */
 template <class T, class Container = std::deque<T>> class stack {
 public:

@@ -34,10 +34,9 @@ template <class T> struct Min {
 // Namespace for tree data-structures.
 namespace tree {
 /*!
- * Implementation of a segment tree. Stores information about intervals of the
- * data, allowing query of this intervals.
- *
- * \template T type of data to store.
+ * Segment tree. Stores information about intervals of the data, allowing query
+ * of this intervals.
+ * \template T data type to store.
  * \template Combine operation to realize on the intervals.
  *
  * \author Eduardo Marinho (eduardo.nestor.marinho228@gmail.com)

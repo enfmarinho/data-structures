@@ -8,8 +8,7 @@
 // Namespace for tree data-structures.
 namespace tree {
 /*!
- * Implementation of a union find data structure. Stores a collection of
- * non-overlapping sets.
+ * Union find data structure. Stores a collection of non-overlapping sets.
  *
  * \author Eduardo Marinho (eduardo.nestor.marinho228@gmail.com)
  */

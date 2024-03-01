@@ -8,7 +8,9 @@
 // Namespace for sequential containers(sc).
 namespace sc {
 /*!
- * Implementation of a vector data structure.
+ * Dynamic size arrays, a.k.a. vector. Stores elements sequentially in the
+ * memory, allowing quick retrieval and storage of values.
+ * \tparam T data type to store.
  *
  * \author Eduardo Marinho (eduardo.nestor.marinho228@gmail.com)
  */

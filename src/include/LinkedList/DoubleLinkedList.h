@@ -9,6 +9,12 @@
 
 // Namespace for sequential containers(sc).
 namespace sc {
+/*!
+ * Double linked list.
+ * \tparam T data type to store.
+ *
+ * \author Eduardo Marinho (eduardo.nestor.marinho228@gmail.com)
+ */
 template <typename T> class list {
 public:
   // Forward declaration.
@@ -519,6 +525,7 @@ public:
    *        provided should come first in the order.
    */
   void sort(Compare comp = std::less<value_type>()) {
+    // TODO fix this.
     // merge_sort(0, m_size, comp);
   }
   /// Checks whether the list "left" are equivalent to the list "right".

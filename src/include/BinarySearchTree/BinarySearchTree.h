@@ -12,6 +12,8 @@ namespace tree {
  * Binary search tree data structure. Important: not self balancing, just a
  * simple implementation.
  * \template T data type to store.
+ *
+ * \author Eduardo Marinho (eduardo.nestor.marinho228@gmail.com)
  */
 template <typename T> class BST {
 public:
@@ -45,42 +47,67 @@ public:
 
 public:
   //=== [I] Special Functions.
+  /// Construct an empty binary search tree.
   BST() = default;
+  /*!
+   * Construct a binary search tree containing the elements presents in "ilist".
+   * \param ilist initializer_list with elements to insert in the tree.
+   */
   BST(std::initializer_list<value_type> ilist) {
     clear();
     for (value_type value : ilist) {
       insert(value);
     }
   }
+  /*!
+   * Construct a binary search tree containing the elements presents in the
+   * range [begin, end).
+   * \param begin beginning of the range to insert.
+   * \param end end of the range to insert(not included).
+   */
   template <typename Itr> BST(Itr begin, Itr end) {
     clear();
     for (; begin != end; ++begin) {
       insert(*begin);
     }
   }
+  /*!
+   * Construct a clone of the binary search tree "other".
+   * \param clone binary search tree to be cloned.
+   */
   BST(BST &clone) {
     for (iterator runner = clone.begin(); runner != clone.end(); ++runner) {
       insert(*runner);
     }
   }
+  /*!
+   * Construct a binary search tree that takes ownership of memory from
+   * "source".
+   * \param source binary search tree to take memory from.
+   */
   BST(BST &&source) noexcept {
     std::swap(m_size, source.m_size);
     std::swap(m_root, source.m_root);
     std::swap(m_end, source.m_end);
     std::swap(m_smallest, source.m_smallest);
   }
+  /// Destructs container, deallocating its memory.
   ~BST() { clear(); }
 
   //=== [II] ITERATORS.
+  /// Returns a iterator to the beginning of the container.
   iterator begin() { return iterator(m_smallest); }
+  /// Returns a iterator to the end of the container.
   iterator end() { return iterator(m_end); }
 
   //=== [III] Capacity.
+  /// Consults whether or not the container is empty.
   [[nodiscard]] bool empty() const { return m_size == 0; }
+  /// Consults the number of elements in the container.
   [[nodiscard]] size_type size() const { return m_size; }
 
   //=== [IV] MODIFIERS
-  /// Removes all elements in the container.
+  /// Removes all elements in the container, making it empty.
   void clear() {
     if (m_root == nullptr) {
       return;
@@ -92,7 +119,7 @@ public:
     m_size = 0;
   }
   /*!
-   * Inserts a node with the "value" data in the container.
+   * Inserts the element "value" in the container.
    * \param value data to insert.
    * \return iterator pointing to inserted data.
    */
@@ -219,13 +246,15 @@ public:
     //=== Aliases.
     using iterator_reference = iterator &;
 
-    /// Default constructor.
+    /// Make this iterator points to "ptr" or nullptr if no pointer is provided.
     iterator(node_pointer ptr = nullptr) { this->m_pointer = ptr; }
-    /// Copy constructor.
+    /// Makes this iterator points to the same address "copy" does.
     iterator(const iterator &copy) { this->m_pointer = copy.m_pointer; }
-    /// Destructor.
+    /// Default destructor.
     ~iterator() = default;
-    iterator &operator=(const iterator &) = default;
+    /// Makes this iterator points to the same address of "it";
+    iterator &operator=(const iterator &it) = default;
+    /// Makes this iterator points to the address "pointer".
     iterator &operator=(Node *pointer) {
       m_pointer = pointer;
       return *this;
@@ -242,9 +271,9 @@ public:
     pointer operator->() { return &(m_pointer->key); }
     /// Constant arrow operator.
     const_pointer operator->() const { return &(m_pointer->key); }
-    /// Consults node parent.
+    /// Returns iterator pointing to the node parent.
     iterator get_parent() { return iterator(m_pointer->parent); }
-    // /// Goes in the direction of the key.
+    /// Goes in the direction of the key.
     iterator next(const_reference key) {
       if (key < m_pointer->key) {
         m_pointer = m_pointer->left_child;
@@ -274,7 +303,7 @@ public:
       }
       return iterator(m_pointer);
     }
-    /// Goes to the next node.
+    /// Goes to the next node. If there is no next node, does nothing.
     iterator operator++(int) {
       Node *copy = m_pointer;
       ++(*this);
@@ -311,6 +340,8 @@ public:
     friend bool operator==(const iterator &lhs, const iterator &rhs) {
       return lhs.m_pointer == rhs.m_pointer;
     }
+    /// Checks whether the underlying pointer of the iterator "lhs" is
+    /// equivalent to "rhs".
     friend bool operator==(const iterator &lhs, node_pointer rhs) {
       return lhs.m_pointer == rhs;
     }
@@ -318,6 +349,8 @@ public:
     friend bool operator!=(const iterator &lhs, const iterator &rhs) {
       return !(lhs == rhs);
     }
+    /// Checks whether the underlying pointer of the iterator "lhs" is
+    /// different to "rhs".
     friend bool operator!=(iterator lhs, node_pointer pointer) {
       return !(lhs == pointer);
     }

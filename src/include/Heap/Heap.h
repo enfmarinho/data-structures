@@ -12,9 +12,11 @@ namespace tree {
 /*!
  * Heap data structure. By default is a max-heap, but it can be changed by
  * defining another compare function.
- * \template T data type to store.
- * \template Container underlying container to be used. Default is vector.
- * \template Compare compare function to be used. Default is std::less.
+ * \tparam T data type to store.
+ * \tparam Container underlying container to be used. Default is vector.
+ * \tparam Compare compare function to be used. Default is std::less.
+ *
+ * \author Eduardo Marinho (eduardo.nestor.marinho228@gmail.com)
  */
 template <typename T, class Container = std::vector<T>,
           class Compare = std::less<typename Container::value_type>>

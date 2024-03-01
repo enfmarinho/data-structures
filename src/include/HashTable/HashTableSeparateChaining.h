@@ -13,7 +13,12 @@
 // Namespace for associative containers(ac).
 namespace ac {
 /*!
- * TODO document.
+ * Hash table data structure with separate chaining as the conflict resolution.
+ * \tparam KeyType data type to store.
+ * \tparam KeyHash hash function.
+ * \tparam KeyEqual function to compare keys.
+ *
+ * \author Eduardo Marinho (eduardo.nestor.marinho228@gmail.com)
  */
 template <class KeyType, class KeyHash = std::hash<KeyType>,
           class KeyEqual = std::equal_to<KeyType>>
@@ -41,23 +46,42 @@ public:
   using const_local_iterator = typename list_type::const_iterator;
 
   ///=== [I] Special Functions.
+  /*!
+   * Construct an empty hash table with capacity for at least "bucket_count"
+   * elements.
+   * \param bucket_count capacity of the container. If not provided, default
+   * will be used.
+   */
   HashTable(size_type bucket_count = DEFAULT_SIZE) {
     m_table.resize(find_next_prime(bucket_count));
   }
+  /*!
+   * Construct a hash table with the contents of the range [first, last).
+   * \param first beginning of the range.
+   * \param last end of the range (not included).
+   */
   template <typename InputIt>
   HashTable(InputIt first, InputIt last,
             size_type bucket_count = DEFAULT_SIZE) {
     m_table.resize(find_next_prime(bucket_count));
     insert(first, last);
   }
+  /// Construct a hash table equal to "other".
   HashTable(const HashTable &other) { *this = other; }
+  /// Construct a hash table that takes ownership of other's memory.
   HashTable(HashTable &&other) { *this = std::move(other); }
+  /// Construct a hash table with the contents of the initializer_list "ilist".
   HashTable(std::initializer_list<value_type> ilist,
             size_type bucket_count = DEFAULT_SIZE) {
     m_table.resize(find_next_prime(bucket_count));
     *this = ilist;
   }
+  /// Default destructor.
   ~HashTable() = default;
+  /*!
+   * Makes this hash table be equivalent to "other".
+   * \param other hash table to be copied.
+   */
   HashTable &operator=(const HashTable &other) {
     clear();
     m_max_load_factor = other.m_max_load_factor;
@@ -67,6 +91,10 @@ public:
     }
     return *this;
   }
+  /*!
+   * Makes this hash table takes ownership of other's memory.
+   * \param other hash table to take memory from.
+   */
   HashTable &operator=(HashTable &&other) {
     m_table = std::move(other.m_table);
     m_max_load_factor = other.m_max_load_factor;
@@ -74,6 +102,12 @@ public:
     other.m_size = 0;
     return *this;
   }
+  /*!
+   * Makes this hash table contains only the contents of the initializer_list
+   * "ilist".
+   * \param ilist initializer_list with elements to be inserted into this hash
+   * table.
+   */
   HashTable &operator=(std::initializer_list<value_type> ilist) {
     clear();
     insert(ilist);
@@ -81,7 +115,9 @@ public:
   }
 
   ///=== [II] Iterators.
+  /// Returns a constant iterator to the beginning of the container.
   const_iterator begin() const { return cbegin(); }
+  /// Returns an iterator to the beginning of the container.
   iterator begin() {
     for (typename table_type::iterator it = m_table.begin();
          it != m_table.end(); ++it) {
@@ -91,12 +127,15 @@ public:
     }
     return end();
   }
+  /// Returns a constant iterator to the end of the container.
   const_iterator end() const { return cend(); }
+  /// Returns an iterator to the end of the container.
   iterator end() {
     typename table_type::iterator m_table_end = m_table.end();
     return iterator(m_table.begin(), m_table_end, m_table_end,
                     (--m_table_end)->end());
   }
+  /// Returns a constant iterator to the begin of the container.
   const_iterator cbegin() const {
     for (typename table_type::const_iterator it = m_table.cbegin();
          it != m_table.cend(); ++it) {
@@ -107,6 +146,7 @@ public:
     }
     return cend();
   }
+  /// returns a constant iterator to the end of the container.
   const_iterator cend() const {
     typename table_type::const_iterator m_table_cend = m_table.cend();
     return const_iterator(m_table.cbegin(), m_table_cend, m_table_cend,
@@ -114,11 +154,13 @@ public:
   }
 
   ///=== [III] Capacity.
+  /// Consults whether or not the container in empty.
   bool empty() const { return m_size == 0; }
+  /// Consults the number of elements in the container.
   size_type size() const { return m_size; }
 
   ///=== [IV] Modifiers.
-  /// Empties the content of the container, i.e. removes all its elements.
+  /// Clears the container, i.e. removes all its elements.
   void clear() {
     for (list_type list : m_table) {
       list.clear();
@@ -169,10 +211,15 @@ public:
   iterator erase(iterator pos) {
     iterator following_removed = pos + 1;
     size_type index = hash(*pos);
-    m_table[index].erase(pos.m_bucket);
+    m_table[index].erase(pos.m_element);
     return following_removed;
   }
-  // template must be iterator or constant iterator
+  /*!
+   * Removes all elements in the container that are in the range [first, last).
+   * InputIt must be a iterator or a const_iterator.
+   * \param first beginning of the range.
+   * \param last end of the range (not included).
+   */
   template <typename InputIt> iterator erase(InputIt first, InputIt last) {
     while (first != last) {
       InputIt copy = first + 1;
@@ -182,6 +229,11 @@ public:
     }
     return last;
   }
+  /*!
+   * Removes all the element that compare equal to "key".
+   * \param key value to be removed.
+   * \return number of elements removed.
+   */
   size_type erase(const_reference key) {
     size_type index = hash(key);
     size_type counter{0};
@@ -194,6 +246,7 @@ public:
     }
     return counter;
   }
+  /// Inserts all elements in "other" into this hash table.
   void merge(HashTable &other) {
     for (value_type element : other) {
       insert(element);
@@ -249,8 +302,8 @@ public:
   /*!
    * Checks if the container has a element equivalent to "key".
    * \param key element to look for.
-   * \return flag that indicates whether the container has a element
-   * equivalent to "key".
+   * \return flag that indicates whether the container has a element equivalent
+   * to "key".
    */
   bool contains(const_reference key) const {
     size_type index = hash(key);
@@ -263,20 +316,27 @@ public:
   }
 
   ///=== [VI] Bucket Interface.
+  /// Returns an iterator to the beginning of the bucket at "index".
   local_iterator begin(const size_type &index) {
     return m_table[index].begin();
   }
+  /// Returns a const_iterator to the beginning of the bucket at "index".
   const_local_iterator cbegin(const size_type &index) const {
     return m_table[index].cbegin();
   }
+  /// Returns an iterator to the end of the bucket at "index".
   local_iterator end(const size_type &index) { return m_table[index].end(); }
+  /// Returns a const_iterator to the end of the bucket at "index".
   const_local_iterator cend(const size_type &index) const {
     return m_table[index].cend();
   }
+  /// Consults the number of buckets in this hash table.
   size_type bucket_count() const { return m_table.size(); }
+  /// Consults the number elements in the bucket at "index"
   size_type bucket_size(const size_type &index) const {
     return m_table[index].size();
   }
+  /// Returns the index of the bucket that key should be into.
   size_type bucket(const_reference key) const { return hash(key); }
 
   ///=== [VII] Hash Policy.
@@ -315,28 +375,45 @@ public:
 
   template <class TableIt, class BucketIt> class HashTableIterator {
   public:
+    /// Default constructor.
     HashTableIterator() = default;
-    HashTableIterator(TableIt table_begin, TableIt table_end, TableIt table,
-                      BucketIt bucket)
-        : m_table_begin{table_begin}, m_table_end{table_end}, m_table(table),
-          m_bucket(bucket) {}
+    /*!
+     * Creates a iterator that points to the bucket "bucket" and to the
+     * element "element".
+     * \param table_begin iterator pointing to the beginning of the table.
+     * \param table_end iterator pointing to the beginning of the table.
+     * \param bucket iterator pointing to the bucket of the element to point to.
+     * \param element iterator pointing to the element to point to.
+     */
+    HashTableIterator(TableIt table_begin, TableIt table_end, TableIt bucket,
+                      BucketIt element)
+        : m_table_begin{table_begin}, m_table_end{table_end}, m_bucket(bucket),
+          m_element(element) {}
+    /// Default copy constructor.
     HashTableIterator(const HashTableIterator &) = default;
+    /// Default operator=().
     HashTableIterator &operator=(const HashTableIterator &copy) = default;
+    /// Default destructor.
     ~HashTableIterator() = default;
-    value_type operator*() { return *m_bucket; }
-    reference operator&() { return &m_bucket; }
-    pointer operator->() const { return &(*m_bucket); }
+    /// Dereference operator.
+    value_type operator*() { return *m_element; }
+    /// Reference operator.
+    reference operator&() { return &m_element; }
+    /// Arrow operator.
+    pointer operator->() const { return &(*m_element); }
+    /// Goes to the next element.
     HashTableIterator &operator++() {
-      ++m_bucket;
-      while (m_bucket == m_table->end() and m_table != m_table_end) {
-        if (++m_table == m_table_end) {
-          m_bucket = (m_table - 1)->end();
+      ++m_element;
+      while (m_element == m_bucket->end() and m_bucket != m_table_end) {
+        if (++m_bucket == m_table_end) {
+          m_element = (m_bucket - 1)->end();
           break;
         }
-        m_bucket = m_table->begin();
+        m_element = m_bucket->begin();
       }
       return *this;
     }
+    /// Goes to the next element.
     HashTableIterator operator++(int) {
       HashTableIterator copy = *this;
       ++(*this);
@@ -357,18 +434,20 @@ public:
                                        HashTableIterator it) {
       return it + increment;
     }
+    /// Goes to the previous element.
     HashTableIterator &operator--() {
-      if (m_bucket != m_table->begin()) {
-        --m_bucket;
+      if (m_element != m_bucket->begin()) {
+        --m_element;
       } else {
-        m_bucket = --(--m_table.end());
-        while (m_table->begin() == m_table->end() and
-               m_table != m_table_begin) {
-          m_bucket = --(--m_table)->end();
+        m_element = --(--m_bucket.end());
+        while (m_bucket->begin() == m_bucket->end() and
+               m_bucket != m_table_begin) {
+          m_element = --(--m_bucket)->end();
         }
       }
       return *this;
     }
+    /// Goes to the previous element.
     HashTableIterator operator--(int) {
       HashTableIterator copy = *this;
       --(*this);
@@ -378,16 +457,18 @@ public:
                                        size_type decrement) {
       return it + (-decrement);
     }
+    /// Checks whether or not this iterator is equivalent to "rhs".
     bool operator==(const HashTableIterator &rhs) {
-      return m_bucket == rhs.m_bucket;
+      return m_element == rhs.m_element;
     }
+    /// Checks whether or not this iterator is different than "rhs".
     bool operator!=(const HashTableIterator &rhs) { return not(*this == rhs); }
 
   private:
-    TableIt m_table_begin; //!<  Iterator to the begin of the table.
+    TableIt m_table_begin; //!< Iterator to the begin of the table.
     TableIt m_table_end;   //!< Iterator to the end of the table.
-    TableIt m_table;       //!< Iterator to the table.
-    BucketIt m_bucket;     //!< iterator to the bucket.
+    TableIt m_bucket;      //!< Iterator to the table.
+    BucketIt m_element;    //!< iterator to the bucket.
   };
 
   /// Returns the index at which the element should be stored.

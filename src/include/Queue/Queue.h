@@ -10,10 +10,12 @@ namespace sc {
 /*!
  * Container adapter that provides the functionality of a queue(FIFO). Acts as a
  * wrapper to the underlying container.
- * \tparam T type of data to store.
+ * \tparam T data type to store.
  * \tparam Container type of the underlying container to store the data. The
  *         container must satisfy the requirements of a Sequence Container.
  *         Default = std::deque.
+ *
+ * \author Eduardo Marinho (eduardo.nestor.marinho228@gmail.com)
  */
 template <class T, class Container = std::deque<T>> class queue {
 public:
