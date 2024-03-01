@@ -243,13 +243,20 @@ TEST(Modifiers, Erase) {
   EXPECT_EQ(*(--btree1.end()), 1);
   EXPECT_TRUE(btree1.erase(1));
   EXPECT_TRUE(btree1.begin() == btree1.end());
+  EXPECT_TRUE(btree1.empty());
 
   tree::BST<int> btree2(list2);
   EXPECT_TRUE(btree2.erase(10));
   EXPECT_TRUE(btree2.erase(1));
   EXPECT_EQ(*btree2.begin(), 2);
-  EXPECT_EQ(*btree2.end(), 9);
+  EXPECT_EQ(*(--btree2.end()), 9);
+  EXPECT_EQ(*btree2.end(), std::numeric_limits<int>::max());
   EXPECT_EQ(btree2.size(), 3);
+  int last = *btree2.begin();
+  for (int value : btree2) {
+    EXPECT_TRUE(value >= last);
+    last = value;
+  }
 
   tree::BST<int> btree3(list3);
   EXPECT_FALSE(btree3.erase(4));
@@ -261,6 +268,7 @@ TEST(Modifiers, Erase) {
   EXPECT_FALSE(btree4.erase(4));
   EXPECT_FALSE(btree4.erase(3));
   EXPECT_FALSE(btree4.erase(9));
+  EXPECT_TRUE(btree4.empty());
 }
 
 int main(int argc, char *argv[]) {
