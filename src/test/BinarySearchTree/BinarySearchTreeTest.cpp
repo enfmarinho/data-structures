@@ -1,8 +1,9 @@
 #include "BinarySearchTree/BinarySearchTree.h"
 #include "gtest/gtest.h"
 #include <initializer_list>
-#include <limits>
+#include <limits> // numeric_limits
 #include <string>
+#include <vector>
 
 TEST(SpecialFunctions, DefaultConstructor) {
   tree::BST<int> btree1;
@@ -150,6 +151,13 @@ TEST(Iterators, IteratorOperations) {
   EXPECT_FALSE(btree3.begin() == btree3.end());
   EXPECT_TRUE(btree3.begin() + btree3.size() == btree3.end());
   EXPECT_TRUE(btree3.begin() == btree3.end() - btree3.size());
+
+  tree::BST<std::vector<int>> btree4;
+  btree4.insert(std::vector<int>({1, 2, 3}));
+  EXPECT_EQ(btree4.size(), 1);
+  EXPECT_EQ(btree4.begin()->size(), 3);
+  btree4.begin()->push_back(5);
+  EXPECT_EQ(btree4.begin()->size(), 4);
 }
 
 TEST(Capacity, Empty) {
