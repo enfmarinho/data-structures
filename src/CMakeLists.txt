@@ -34,7 +34,7 @@ target_link_libraries(
   PRIVATE pthread)
 target_compile_features(deque_test PUBLIC cxx_std_17)
 
-# Hash table
+# Hash table with separate chaining
 add_executable(hash_table_separate_chaining_test
                test/HashTable/HashTableSeparateChainingTest.cpp)
 target_link_libraries(
@@ -51,7 +51,7 @@ target_link_libraries(
   PRIVATE pthread)
 target_compile_features(heap_test PUBLIC cxx_std_17)
 
-# Linked list
+# Double Linked list
 add_executable(double_linked_list_test test/LinkedList/DoubleLinkedListTest.cpp)
 target_link_libraries(
   double_linked_list_test
@@ -67,13 +67,23 @@ target_link_libraries(
   PRIVATE pthread)
 target_compile_features(queue_test PUBLIC cxx_std_17)
 
-# Red black tree
-add_executable(red_black_tree_test test/RedBlackTree/RedBlackTreeTest.cpp)
+# Red black tree with fat nodes
+add_executable(red_black_tree_fat_nodes_test
+               test/RedBlackTree/RedBlackTreeFatNodesTest.cpp)
 target_link_libraries(
-  red_black_tree_test
+  red_black_tree_fat_nodes_test
   PRIVATE ${GTEST_LIBRARIES}
   PRIVATE pthread)
-target_compile_features(red_black_tree_test PUBLIC cxx_std_17)
+target_compile_features(red_black_tree_fat_nodes_test PUBLIC cxx_std_17)
+
+# Red black tree unique
+add_executable(red_black_tree_unique_test
+               test/RedBlackTree/RedBlackTreeUniqueTest.cpp)
+target_link_libraries(
+  red_black_tree_unique_test
+  PRIVATE ${GTEST_LIBRARIES}
+  PRIVATE pthread)
+target_compile_features(red_black_tree_unique_test PUBLIC cxx_std_17)
 
 # Segment tree
 add_executable(segment_tree_test test/SegmentTree/SegmentTreeTest.cpp)
