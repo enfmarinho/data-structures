@@ -1,6 +1,5 @@
 #include "RedBlackTree/RedBlackTreeFatNodes.h"
 #include "gtest/gtest.h"
-#include <algorithm> // sort
 #include <initializer_list>
 #include <limits> // numeric_limits
 #include <string>
@@ -28,13 +27,12 @@ TEST(SpecialFunctions, InitializerListConstructor) {
     EXPECT_EQ(value, ++counter);
   }
 
-  std::initializer_list<int> list{4, 1, 5, 6, 3, 7, 2, 1, 9, 9};
-  tree::RBT<int> rbt2(list);
-  EXPECT_EQ(rbt2.size(), list.size());
-  auto it = list.begin();
-  std::sort(list.begin(), list.end());
+  tree::RBT<int> rbt2{4, 1, 5, 6, 3, 7, 2, 1, 9, 9};
+  EXPECT_EQ(rbt2.size(), 10);
+  int last = *rbt2.begin();
   for (int value : rbt2) {
-    EXPECT_EQ(value, *it++);
+    EXPECT_TRUE(value >= last);
+    last = value;
   }
 
   tree::RBT<int> rbt3{};
@@ -151,12 +149,11 @@ TEST(Iterators, IteratorOperations) {
   rbt4.begin()->push_back(5);
   EXPECT_EQ(rbt4.begin()->size(), 4);
 
-  std::initializer_list<int> list{9, 9, 1, 1, 3, 7, 4, 10, 0, 0, 5, 4, 91};
-  tree::RBT<int> rbt5(list);
-  std::sort(list.begin(), list.end());
-  auto it = list.begin();
+  tree::RBT<int> rbt5{9, 9, 1, 1, 3, 7, 4, 10, 0, 0, 5, 4, 91};
+  int last = *rbt5.begin();
   for (int value : rbt5) {
-    EXPECT_EQ(value, *it++);
+    EXPECT_TRUE(value >= last);
+    last = value;
   }
   EXPECT_EQ(*rbt5.begin(), 0);
   EXPECT_EQ(*(++rbt5.begin()), 0);

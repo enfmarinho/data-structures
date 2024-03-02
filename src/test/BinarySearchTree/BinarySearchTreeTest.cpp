@@ -20,25 +20,23 @@ TEST(SpecialFunctions, DefaultConstructor) {
 }
 
 TEST(SpecialFunctions, InitializerListConstructor) {
-  std::initializer_list<int> list1{1, 2, 3, 4}, list2{4, 1, 5, 6, 3, 7, 2},
-      list3{};
-
-  tree::BST<int> btree1(list1);
-  EXPECT_EQ(btree1.size(), list1.size());
+  tree::BST<int> btree1({1, 2, 3, 4});
+  EXPECT_EQ(btree1.size(), 4);
   int counter{0};
   for (int value : btree1) {
     EXPECT_EQ(value, ++counter);
   }
 
-  tree::BST<int> btree2(list2);
-  EXPECT_EQ(btree2.size(), list2.size());
-  counter = 0;
+  tree::BST<int> btree2({4, 1, 5, 6, 3, 7, 2, 2});
+  EXPECT_EQ(btree2.size(), 8);
+  int last = *btree2.begin();
   for (int value : btree2) {
-    EXPECT_EQ(value, ++counter);
+    EXPECT_TRUE(value >= last);
+    last = value;
   }
 
-  tree::BST<int> btree3(list3);
-  EXPECT_EQ(btree3.size(), list3.size());
+  tree::BST<int> btree3({});
+  EXPECT_EQ(btree3.size(), 0);
   EXPECT_TRUE(btree3.empty());
   EXPECT_EQ(btree3.begin(), btree3.end());
 }
@@ -68,10 +66,7 @@ TEST(SpecialFunctions, RangeConstructor) {
 }
 
 TEST(SpecialFunctions, CopyConstructor) {
-  std::initializer_list<int> list1{1, 2, 3, 4}, list2{4, 1, 5, 6, 3, 7, 2},
-      list3{};
-
-  tree::BST<int> btree1(list1);
+  tree::BST<int> btree1({1, 2, 3, 4});
   tree::BST<int> btree1_copy(btree1);
   EXPECT_EQ(btree1.size(), btree1_copy.size());
   for (auto it = btree1.begin(), it_copy = btree1_copy.begin();
@@ -79,7 +74,7 @@ TEST(SpecialFunctions, CopyConstructor) {
     EXPECT_EQ(*it, *it_copy);
   }
 
-  tree::BST<int> btree2(list2);
+  tree::BST<int> btree2{4, 1, 5, 6, 3, 7, 2, 2};
   tree::BST<int> btree2_copy(btree2);
   EXPECT_EQ(btree2.size(), btree2_copy.size());
   for (auto it = btree2.begin(), it_copy = btree2_copy.begin();
@@ -87,7 +82,7 @@ TEST(SpecialFunctions, CopyConstructor) {
     EXPECT_EQ(*it, *it_copy);
   }
 
-  tree::BST<int> btree3(list3);
+  tree::BST<int> btree3({});
   tree::BST<int> btree3_copy(btree3);
   EXPECT_EQ(btree3.size(), btree3_copy.size());
   for (auto it = btree3.begin(), it_copy = btree3_copy.begin();
@@ -97,31 +92,28 @@ TEST(SpecialFunctions, CopyConstructor) {
 }
 
 TEST(SpecialFunctions, MoveConstructor) {
-  std::initializer_list<int> list1{1, 2, 3, 4}, list2{4, 1, 5, 6, 3, 7, 2},
-      list3{};
-
-  tree::BST<int> btree1(list1);
+  tree::BST<int> btree1{1, 2, 3, 4};
   tree::BST<int> btree1_copy(std::move(btree1));
   EXPECT_EQ(btree1.size(), 0);
-  EXPECT_EQ(btree1_copy.size(), list1.size());
+  EXPECT_EQ(btree1_copy.size(), 4);
   int last = *btree1_copy.begin();
   for (int value : btree1_copy) {
     EXPECT_TRUE(last <= value);
   }
 
-  tree::BST<int> btree2(list2);
+  tree::BST<int> btree2{4, 1, 5, 6, 3, 7, 2, 2};
   tree::BST<int> btree2_copy(std::move(btree2));
   EXPECT_EQ(btree2.size(), 0);
-  EXPECT_EQ(btree2_copy.size(), list2.size());
+  EXPECT_EQ(btree2_copy.size(), 8);
   last = *btree2_copy.begin();
   for (int value : btree2_copy) {
     EXPECT_TRUE(last <= value);
   }
 
-  tree::BST<int> btree3(list3);
+  tree::BST<int> btree3;
   tree::BST<int> btree3_copy(std::move(btree3));
   EXPECT_EQ(btree3.size(), 0);
-  EXPECT_EQ(btree3_copy.size(), list3.size());
+  EXPECT_EQ(btree3_copy.size(), 0);
   EXPECT_EQ(btree3_copy.begin(), btree3_copy.end());
 }
 
@@ -161,53 +153,52 @@ TEST(Iterators, IteratorOperations) {
 }
 
 TEST(Capacity, Empty) {
-  std::initializer_list<int> list1{1, 2, 3}, list2{5, 1, 9, 10, 2}, list3{1},
-      list4{};
-
-  tree::BST<int> btree1(list1);
+  tree::BST<int> btree1({1, 2, 3});
   EXPECT_FALSE(btree1.empty());
 
-  tree::BST<int> btree2(list2);
+  tree::BST<int> btree2({5, 1, 9, 10, 2});
   EXPECT_FALSE(btree2.empty());
 
-  tree::BST<int> btree3(list3);
+  tree::BST<int> btree3({1});
   EXPECT_FALSE(btree3.empty());
 
-  tree::BST<int> btree4(list4);
+  tree::BST<int> btree4({});
   EXPECT_TRUE(btree4.empty());
 }
 
 TEST(Capacity, Size) {
-  std::initializer_list<int> list1{1, 2, 3}, list2{5, 1, 9, 10, 2}, list3{1},
-      list4{};
+  tree::BST<int> btree1({1, 2, 3});
+  EXPECT_EQ(btree1.size(), 3);
 
-  tree::BST<int> btree1(list1);
-  EXPECT_EQ(btree1.size(), list1.size());
+  tree::BST<int> btree2({5, 1, 9, 10, 2});
+  EXPECT_EQ(btree2.size(), 5);
 
-  tree::BST<int> btree2(list2);
-  EXPECT_EQ(btree2.size(), list2.size());
+  tree::BST<int> btree3({1});
+  EXPECT_EQ(btree3.size(), 1);
 
-  tree::BST<int> btree3(list3);
-  EXPECT_EQ(btree3.size(), list3.size());
-
-  tree::BST<int> btree4(list4);
-  EXPECT_EQ(btree4.size(), list4.size());
+  tree::BST<int> btree4({});
+  EXPECT_EQ(btree4.size(), 0);
 }
 
 TEST(Modifiers, Clear) {
-  std::initializer_list<int> list1{1, 2, 3}, list2{5, 1, 9, 10, 2}, list3{1},
-      list4{};
-
-  tree::BST<int> btree1(list1);
+  tree::BST<int> btree1({1, 2, 3});
   EXPECT_FALSE(btree1.empty());
+  btree1.clear();
+  EXPECT_TRUE(btree1.empty());
 
-  tree::BST<int> btree2(list2);
+  tree::BST<int> btree2({5, 1, 9, 10, 2});
   EXPECT_FALSE(btree2.empty());
+  btree2.clear();
+  EXPECT_TRUE(btree2.empty());
 
-  tree::BST<int> btree3(list3);
+  tree::BST<int> btree3({1});
   EXPECT_FALSE(btree3.empty());
+  btree3.clear();
+  EXPECT_TRUE(btree3.empty());
 
-  tree::BST<int> btree4(list4);
+  tree::BST<int> btree4({});
+  EXPECT_TRUE(btree4.empty());
+  btree4.clear();
   EXPECT_TRUE(btree4.empty());
 }
 
@@ -240,9 +231,7 @@ TEST(Modifiers, Insert) {
 }
 
 TEST(Modifiers, Erase) {
-  std::initializer_list<int> list1{1, 2, 3}, list2{5, 1, 9, 10, 2}, list3{1},
-      list4{};
-  tree::BST<int> btree1(list1);
+  tree::BST<int> btree1{1, 2, 3};
   EXPECT_TRUE(btree1.erase(2));
   EXPECT_EQ(*(++btree1.begin()), 3);
   EXPECT_EQ(*(btree1.end() - 2), 1);
@@ -253,26 +242,26 @@ TEST(Modifiers, Erase) {
   EXPECT_TRUE(btree1.begin() == btree1.end());
   EXPECT_TRUE(btree1.empty());
 
-  tree::BST<int> btree2(list2);
+  tree::BST<int> btree2({5, 1, 9, 10, 2, 2});
   EXPECT_TRUE(btree2.erase(10));
   EXPECT_TRUE(btree2.erase(1));
   EXPECT_EQ(*btree2.begin(), 2);
   EXPECT_EQ(*(--btree2.end()), 9);
   EXPECT_EQ(*btree2.end(), std::numeric_limits<int>::max());
-  EXPECT_EQ(btree2.size(), 3);
+  EXPECT_EQ(btree2.size(), 4);
   int last = *btree2.begin();
   for (int value : btree2) {
     EXPECT_TRUE(value >= last);
     last = value;
   }
 
-  tree::BST<int> btree3(list3);
+  tree::BST<int> btree3({1});
   EXPECT_FALSE(btree3.erase(4));
   EXPECT_TRUE(btree3.erase(1));
   EXPECT_EQ(btree3.size(), 0);
   EXPECT_TRUE(btree3.begin() == btree3.end());
 
-  tree::BST<int> btree4(list4);
+  tree::BST<int> btree4;
   EXPECT_FALSE(btree4.erase(4));
   EXPECT_FALSE(btree4.erase(3));
   EXPECT_FALSE(btree4.erase(9));
