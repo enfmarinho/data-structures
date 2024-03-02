@@ -11,12 +11,12 @@ TEST(SpecialFunctions, DefaultConstructor) {
   EXPECT_TRUE(btree1.empty());
 
   tree::BST<char> btree2;
-  EXPECT_EQ(btree1.size(), 0);
-  EXPECT_TRUE(btree1.empty());
+  EXPECT_EQ(btree2.size(), 0);
+  EXPECT_TRUE(btree2.empty());
 
   tree::BST<std::string> btree3;
-  EXPECT_EQ(btree1.size(), 0);
-  EXPECT_TRUE(btree1.empty());
+  EXPECT_EQ(btree3.size(), 0);
+  EXPECT_TRUE(btree3.empty());
 }
 
 TEST(SpecialFunctions, InitializerListConstructor) {
