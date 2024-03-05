@@ -13,6 +13,8 @@ namespace tree {
  * Trie data structure. Allows efficient storage of strings with common
  * prefixes, making it ideal for a lot of string-searching algorithms, such as
  * predictive text, approximate string matching, and spell checking.
+ *
+ * \author Eduardo Marinho (eduardo.nestor.marinho228@gmail.com)
  */
 class Trie {
 public:
