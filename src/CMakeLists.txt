@@ -101,6 +101,14 @@ target_link_libraries(
   PRIVATE pthread)
 target_compile_features(stack_test PUBLIC cxx_std_17)
 
+# Trie
+add_executable(trie_test test/Trie/TrieTest.cpp)
+target_link_libraries(
+  trie_test
+  PRIVATE ${GTEST_LIBRARIES}
+  PRIVATE pthread)
+target_compile_features(trie_test PUBLIC cxx_std_17)
+
 # Union find
 add_executable(union_find_test test/UnionFind/UnionFindTest.cpp)
 target_link_libraries(
