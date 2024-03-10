@@ -231,6 +231,8 @@ TEST(Iterator, IteratorOperations) {
   EXPECT_FALSE(it == deque1.end());
   it = deque1.end();
   EXPECT_TRUE(it == deque1.end());
+  lib::deque<int>::iterator it_cp = lib::deque<int>::iterator(it);
+  EXPECT_TRUE(it_cp == it);
 
   sc::deque<int, 2> deque2{1, 2, 3, 4, 5};
   EXPECT_FALSE(deque2.begin() == deque2.end());
@@ -243,6 +245,8 @@ TEST(Iterator, IteratorOperations) {
   EXPECT_FALSE(it2 == deque2.end());
   it2 = deque2.end();
   EXPECT_TRUE(it2 == deque2.end());
+  sc::deque<int, 2>::iterator it2_cp = sc::deque<int, 2>::iterator(it2);
+  EXPECT_TRUE(it2_cp == it2);
 
   lib::deque<int> deque3;
   EXPECT_TRUE(deque3.begin() == deque3.end());
@@ -264,6 +268,8 @@ TEST(ConstIterator, ConstIteratorOperations) {
   EXPECT_FALSE(it == deque1.cend());
   it = deque1.cend();
   EXPECT_TRUE(it == deque1.cend());
+  lib::deque<int>::const_iterator it_cp = lib::deque<int>::const_iterator(it);
+  EXPECT_TRUE(it_cp == it);
 
   sc::deque<int, 2> deque2{1, 2, 3, 4, 5};
   EXPECT_FALSE(deque2.cbegin() == deque2.cend());
@@ -276,6 +282,9 @@ TEST(ConstIterator, ConstIteratorOperations) {
   EXPECT_FALSE(it2 == deque2.cend());
   it2 = deque2.cend();
   EXPECT_TRUE(it2 == deque2.cend());
+  sc::deque<int, 2>::const_iterator it2_cp =
+      sc::deque<int, 2>::const_iterator(it2);
+  EXPECT_TRUE(it2_cp == it2);
 
   lib::deque<int> deque3;
   EXPECT_TRUE(deque3.cbegin() == deque3.cend());
