@@ -234,8 +234,7 @@ public:
     }
     --m_size;
     if (m_size == 0) {
-      m_smallest = m_end;
-      m_root = nullptr;
+      m_root = m_smallest = m_end;
     }
     delete &it;
     return true;
