@@ -179,7 +179,7 @@ public:
     typename block_t::iterator block_mid_it =
         (*mob_mid_it)->begin() + BlockSize / 2;
     m_head = iterator(mob_mid_it, block_mid_it);
-    m_head = m_tail;
+    m_tail = m_head;
     m_size = 0;
   }
   /*!
@@ -218,21 +218,23 @@ public:
     m_size += count;
     position_e position = closer_to(pos);
     pos = space_vacancy(position, pos, count);
-    if (position == position_e::FRONT) {
+    if (pos == m_tail) {
+      m_tail = m_tail + count;
+      pos = m_tail - 1;
+    } else if (position == position_e::FRONT) {
       copy(m_head, pos, m_head - count);
+      --pos;
       m_head = m_head - count;
-    } else if (pos != m_tail) {
+    } else {
       copy_backward(pos + 1, m_tail, m_tail + count);
       m_tail = m_tail + count;
       pos = pos + count - 1;
-    } else {
-      m_tail = m_tail + count;
-      pos = pos + count - 1;
     }
-    for (size_type counter{0}; counter < count; ++counter, --pos) {
+    for (size_type counter{0}; counter < count; ++counter) {
       *pos = value;
+      --pos;
     }
-    return pos;
+    return pos + 1;
   }
   /*!
    * Inserts the elements in the range [first, last) before the iterator "pos".
@@ -278,6 +280,9 @@ public:
    *         inserted.
    */
   iterator insert(iterator pos, std::initializer_list<value_type> ilist) {
+    if (ilist.size() == 0) {
+      return pos;
+    }
     m_size += ilist.size();
     position_e position = closer_to(pos);
     pos = space_vacancy(position, pos, ilist.size());
@@ -293,7 +298,7 @@ public:
       m_head = m_head - ilist.size();
       return pos;
     } else if (pos != m_tail) {
-      copy_backward(pos + 1, m_tail, m_tail + ilist.size());
+      copy_backward(pos, m_tail, m_tail + ilist.size());
     }
     for (value_type value : ilist) {
       *pos = value;
@@ -396,6 +401,8 @@ public:
       m_element = other.m_element;
       return *this;
     }
+    DequeIterator(iterator other)
+        : m_block(other.get_block_it()), m_element(other.get_element_it()) {}
     /// Dereference operator
     reference operator*() { return *m_element; }
     /// Constant dereference operator
