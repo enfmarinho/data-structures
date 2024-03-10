@@ -101,6 +101,8 @@ public:
   }
 
   ///=== [III] Capacity.
+  /// Consults whether the container is empty.
+  [[nodiscard]] bool empty() const { return m_size == 0; }
   /// Consults the number of strings in the container.
   [[nodiscard]] size_type size() const { return m_size; }
 
@@ -149,7 +151,7 @@ public:
     Node *runner = m_root;
     for (char letter : word) {
       auto it = runner->table.find(letter);
-      if (it != m_root->table.end()) {
+      if (it != runner->table.end()) {
         runner = it->second;
       } else {
         return false;
@@ -180,7 +182,7 @@ public:
     Node *runner = m_root;
     for (char letter : word) {
       auto it = runner->table.find(letter);
-      if (it == m_root->table.end()) {
+      if (it == runner->table.end()) {
         return false;
       }
       runner = it->second;
@@ -200,7 +202,8 @@ public:
       return true;
     }
     char last_letter;
-    while (not pointers.empty() and pointers.top().second->count <= 1) {
+    while (not pointers.empty() and pointers.top().second->count <= 1 and
+           not pointers.top().second->table.empty()) {
       delete pointers.top().second;
       last_letter = pointers.top().first;
       pointers.pop();
