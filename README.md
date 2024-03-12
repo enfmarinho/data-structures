@@ -8,7 +8,7 @@ This repository contain a collection of data structures written in C++.
 
  - C++ compiler that supports at least C++17. I recommend clang or gcc.
  - Cmake version 3.5 or greater.
- - googletest framework. To install it run the commands bellow:
+ - Googletest framework. To install it run the commands bellow:
 ```bash
 git clone https://github.com/google/googletest.git && cd googletest
 cmake -S . -B build && cd build
@@ -42,12 +42,16 @@ generated for BinarySearchTreeTest.cpp is named binary_search_tree_test.
 # Implemented data structures
 
 - [Binary search tree](src/include/BinarySearchTree/BinarySearchTree.h)
+- [Deque](src/include/Deque/Deque.h)
 - [Hash table](src/include/HashTable/HashTableSeparateChaining.h)
 - [Heap](src/include/Heap/Heap.h)
-- [Linked list](src/include/LinkedList/DoubleLinkedList.h)
+- [Double Linked list](src/include/LinkedList/DoubleLinkedList.h)
 - [Queue](src/include/Queue/Queue.h)
+- [Red black tree](src/include/RedBlackTree/RedBlackTreeUnique.h)
+- [Red black tree with fat nodes](src/include/RedBlackTree/RedBlackTreeFatNodes.h)
 - [Segment tree](src/include/SegmentTree/SegmentTree.h)
 - [Stack](src/include/Stack/Stack.h)
+- [Trie](src/include/Trie/Trie.h)
 - [Union find](src/include/UnionFind/UnionFind.h)
 - [Vector](src/include/Vector/Vector.h)
 
