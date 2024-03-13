@@ -9,8 +9,16 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Append to existing flags.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g") # Flag to produce debug info.
+add_compile_options(
+  "-Wall"
+  "-Werror"
+  "-Wpedantic"
+  "-Wshadow"
+  "-Wsign-compare"
+  "-Wold-style-cast"
+  "-Wcast-align"
+  "-Wcast-qual")
+# add_compile_options("-g") # Flag to produce debug info.
 
 # Include required dependencies
 find_package(GTest REQUIRED)
