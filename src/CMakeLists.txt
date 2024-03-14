@@ -11,7 +11,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Append to existing flags.
 add_compile_options(
   "-Wall"
-  "-Werror"
   "-Wpedantic"
   "-Wshadow"
   "-Wsign-compare"

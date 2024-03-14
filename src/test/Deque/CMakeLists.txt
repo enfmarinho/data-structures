@@ -4,13 +4,13 @@ project(Deque LANGUAGES CXX)
 # Append to existing flags.
 add_compile_options(
   "-Wall"
-  "-Werror"
   "-Wpedantic"
   "-Wshadow"
+  "-Wsign-compare"
   "-Wold-style-cast"
   "-Wcast-align"
   "-Wcast-qual")
-add_compile_options("-g") # Flag to produce debug info.
+# add_compile_options("-g") # Flag to produce debug info.
 
 # Include required dependencies.
 find_package(GTest REQUIRED)

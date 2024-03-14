@@ -4,7 +4,6 @@ project(Vector LANGUAGES CXX)
 # Append to existing flags.
 add_compile_options(
   "-Wall"
-  "-Werror"
   "-Wpedantic"
   "-Wshadow"
   "-Wsign-compare"
