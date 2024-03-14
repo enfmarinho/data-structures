@@ -57,7 +57,7 @@ TEST(SpecialFunctions, RangeConstructor) {
   int array[] = {9, 3, 5, 9, 1, 8, 3, 6};
   lib::deque<int> deque1(array, array + 4);
   EXPECT_EQ(deque1.size(), 4);
-  for (int index{0}; index < deque1.size(); ++index) {
+  for (unsigned int index{0}; index < deque1.size(); ++index) {
     EXPECT_EQ(deque1[index], array[index]);
   }
 
@@ -70,13 +70,13 @@ TEST(SpecialFunctions, RangeConstructor) {
 
   lib::deque<int> deque4(array, array + 8);
   EXPECT_EQ(deque4.size(), 8);
-  for (int index{0}; index < deque4.size(); ++index) {
+  for (unsigned int index{0}; index < deque4.size(); ++index) {
     EXPECT_EQ(deque4[index], array[index]);
   }
 
   lib::deque<int> deque5(array, array + 5);
   EXPECT_EQ(deque5.size(), 5);
-  for (int index = 0; index < deque5.size(); ++index) {
+  for (unsigned int index = 0; index < deque5.size(); ++index) {
     EXPECT_EQ(deque5[index], array[index]);
   }
 }
@@ -92,7 +92,7 @@ TEST(SpecialFunctions, CopyConstructor) {
   EXPECT_EQ(deque1.size(), ilist1.size());
   EXPECT_EQ(deque1_copy.size(), ilist1.size());
   int counter{0};
-  for (int index{0}; index < deque1_copy.size(); ++index) {
+  for (unsigned int index{0}; index < deque1_copy.size(); ++index) {
     EXPECT_EQ(deque1_copy[index], ++counter);
     EXPECT_EQ(deque1_copy[index], deque1[index]);
   }
@@ -109,7 +109,7 @@ TEST(SpecialFunctions, CopyConstructor) {
   EXPECT_EQ(deque3.size(), ilist3.size());
   EXPECT_EQ(deque3_copy.size(), ilist3.size());
   auto list_it = ilist3.begin();
-  for (int index{0}; index < deque3_copy.size(); ++index) {
+  for (unsigned int index{0}; index < deque3_copy.size(); ++index) {
     EXPECT_EQ(deque3_copy[index], *list_it++);
     EXPECT_EQ(deque3_copy[index], deque3[index]);
   }
@@ -127,7 +127,7 @@ TEST(SpecialFunctions, MoveConstructor) {
   EXPECT_FALSE(deque1_copy.empty());
   EXPECT_EQ(deque1_copy.size(), ilist1.size());
   int counter{0};
-  for (int index{0}; index < deque1_copy.size(); ++index) {
+  for (unsigned int index{0}; index < deque1_copy.size(); ++index) {
     EXPECT_EQ(deque1_copy[index], ++counter);
   }
 
@@ -142,14 +142,14 @@ TEST(SpecialFunctions, MoveConstructor) {
   EXPECT_FALSE(deque3_copy.empty());
   EXPECT_EQ(deque3_copy.size(), ilist3.size());
   auto list_it = ilist3.begin();
-  for (int index{0}; index < deque3_copy.size(); ++index) {
+  for (unsigned int index{0}; index < deque3_copy.size(); ++index) {
     EXPECT_EQ(deque3_copy[index], *list_it++);
   }
 }
 
 TEST(ElementAccess, at) {
   lib::deque<int> deque1{1, 2, 3, 4, 5, 6, 7, 8, 9};
-  for (int idx{0}; idx < deque1.size(); ++idx) {
+  for (unsigned int idx{0}; idx < deque1.size(); ++idx) {
     EXPECT_EQ(deque1[idx], idx + 1);
   }
   deque1[8] = 3;
@@ -162,7 +162,7 @@ TEST(ElementAccess, at) {
     deque2.push_back(value);
   }
   int counter{0};
-  for (int idx{0}; idx < deque2.size(); ++idx, ++counter) {
+  for (unsigned int idx{0}; idx < deque2.size(); ++idx, ++counter) {
     EXPECT_EQ(deque2[idx], 11 * idx + 11);
   }
   EXPECT_EQ(counter, deque2.size());
@@ -188,6 +188,7 @@ TEST(ElementAccess, front) {
   for (int value = 0; value < 10; ++value) {
     deque2.push_front(value);
   }
+  EXPECT_EQ(deque2.size(), 10);
   for (int value = 9; value >= 0; --value) {
     EXPECT_EQ(deque2.front(), value);
     deque2.pop_front();
@@ -411,7 +412,7 @@ TEST(Modifiers, InsertValue) {
   for (int value = 0; value < 1000; ++value) {
     deque4.push_back(value);
   }
-  for (int expected = 0; expected < 1000; ++expected) {
+  for (expected = 0; expected < 1000; ++expected) {
     EXPECT_EQ(deque4.front(), expected);
     deque4.pop_front();
   }
@@ -429,7 +430,7 @@ TEST(Modifiers, InsertCopies) {
   EXPECT_EQ(counter, 5);
   EXPECT_EQ(deque1.insert(9, 1, deque1.begin()), deque1.begin());
   EXPECT_EQ(deque1.size(), 14);
-  for (int index{0}; index < deque1.size(); ++index) {
+  for (unsigned int index{0}; index < deque1.size(); ++index) {
     if (index < 9) {
       EXPECT_EQ(deque1[index], 1);
     } else {
@@ -447,7 +448,7 @@ TEST(Modifiers, InsertCopies) {
   EXPECT_EQ(deque2.size(), 1);
   EXPECT_EQ(deque2.insert(2, 9, deque2.end()), ++deque2.begin());
   EXPECT_EQ(deque2.size(), 3);
-  for (int index{0}; index < deque2.size(); ++index) {
+  for (unsigned int index{0}; index < deque2.size(); ++index) {
     if (index < 1) {
       EXPECT_EQ(deque2[index], 2);
     } else {
@@ -661,7 +662,7 @@ TEST(Modifiers, resize) {
   EXPECT_EQ(expected, 3);
   deque1.resize(9, 2);
   EXPECT_EQ(deque1.size(), 9);
-  for (int index{0}; index < deque1.size(); ++index) {
+  for (unsigned int index{0}; index < deque1.size(); ++index) {
     if (index < 3) {
       EXPECT_EQ(deque1[index], index + 1);
     } else {
@@ -681,7 +682,7 @@ TEST(Modifiers, resize) {
     EXPECT_EQ(value, int());
   }
   deque2.resize(18, 5);
-  for (int index{0}; index < deque2.size(); ++index) {
+  for (unsigned int index{0}; index < deque2.size(); ++index) {
     if (index < 16) {
       EXPECT_EQ(deque2[index], int());
     } else {

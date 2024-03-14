@@ -48,7 +48,7 @@ TEST(ElementAccess, UniteFind) {
   }
   ufind.unite(0, 2);
   for (int index{0}; index < 5; ++index) {
-    if (index == 0 or index == 2) {
+    if (index == 0 || index == 2) {
       EXPECT_EQ(ufind.find(0), ufind.find(2));
     } else {
       EXPECT_EQ(ufind.find(index), index);
@@ -93,7 +93,7 @@ TEST(Capacity, group_size) {
   }
   ufind.unite(1, 4);
   for (int index{0}; index < 5; ++index) {
-    if (index == 1 or index == 4) {
+    if (index == 1 || index == 4) {
       EXPECT_EQ(ufind.group_size(index), 2);
     } else {
       EXPECT_EQ(ufind.group_size(index), 1);
@@ -102,7 +102,7 @@ TEST(Capacity, group_size) {
   ufind.unite(4, 2);
   ufind.unite(0, 3);
   for (int index{0}; index < 5; ++index) {
-    if (index == 1 or index == 4 or index == 2) {
+    if (index == 1 || index == 4 || index == 2) {
       EXPECT_EQ(ufind.group_size(index), 3);
     } else {
       EXPECT_EQ(ufind.group_size(index), 2);

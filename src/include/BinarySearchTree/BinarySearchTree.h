@@ -1,5 +1,5 @@
-#ifndef BST_H
-#define BST_H
+#ifndef SRC_INCLUDE_BINARYSEARCHTREE_BINARYSEARCHTREE_H_
+#define SRC_INCLUDE_BINARYSEARCHTREE_BINARYSEARCHTREE_H_
 
 #include <cstddef> // size_t, ptrdiff_t
 #include <initializer_list>
@@ -15,7 +15,7 @@ namespace tree {
  *
  * \author Eduardo Marinho (eduardo.nestor.marinho228@gmail.com)
  */
-template <typename T> class BST {
+template <typename T> class BinarySearchTree {
 public:
   // Forward declaration.
   class iterator;
@@ -48,12 +48,12 @@ public:
 public:
   //=== [I] Special Functions.
   /// Construct an empty binary search tree.
-  BST() = default;
+  BinarySearchTree() = default;
   /*!
    * Construct a binary search tree containing the elements presents in "ilist".
    * \param ilist initializer_list with elements to insert in the tree.
    */
-  BST(std::initializer_list<value_type> ilist) {
+  BinarySearchTree(std::initializer_list<value_type> ilist) {
     clear();
     for (value_type value : ilist) {
       insert(value);
@@ -65,17 +65,18 @@ public:
    * \param begin beginning of the range to insert.
    * \param end end of the range to insert(not included).
    */
-  template <typename Itr> BST(Itr begin, Itr end) {
+  template <typename Itr> BinarySearchTree(Itr begin, Itr end) {
     clear();
     for (; begin != end; ++begin) {
       insert(*begin);
     }
   }
   /*!
-   * Construct a clone of the binary search tree "other".
-   * \param clone binary search tree to be cloned.
+   * Construct a clone of the binary search tree "other". Clone will not be
+   * changed, it is not passed by const_reference since there is no
+   * const_iterators. \param clone binary search tree to be cloned.
    */
-  BST(BST &clone) {
+  explicit BinarySearchTree(BinarySearchTree &clone) {
     for (iterator runner = clone.begin(); runner != clone.end(); ++runner) {
       insert(*runner);
     }
@@ -85,14 +86,14 @@ public:
    * "source".
    * \param source binary search tree to take memory from.
    */
-  BST(BST &&source) noexcept {
+  BinarySearchTree(BinarySearchTree &&source) noexcept {
     std::swap(m_size, source.m_size);
     std::swap(m_root, source.m_root);
     std::swap(m_end, source.m_end);
     std::swap(m_smallest, source.m_smallest);
   }
   /// Destructs container, deallocating its memory.
-  ~BST() { clear(); }
+  ~BinarySearchTree() { clear(); }
 
   //=== [II] ITERATORS.
   /// Returns a iterator to the beginning of the container.
@@ -142,7 +143,7 @@ public:
       (&parent)->right_child = new_node;
     }
 
-    if (m_end == nullptr and m_smallest == nullptr) {
+    if (m_end == nullptr && m_smallest == nullptr) {
       m_end = new_node->right_child;
       m_smallest = new_node;
     } else if (value >= *m_end) {
@@ -160,7 +161,7 @@ public:
    */
   bool erase(const_reference key) {
     iterator runner{m_root};
-    while (runner != nullptr and (&runner)->key != key) {
+    while (runner != nullptr && (&runner)->key != key) {
       runner.next(key);
     }
     return erase(runner);
@@ -171,7 +172,7 @@ public:
    * \return boolean representing whether or not a element was removed.
    */
   bool erase(iterator it) {
-    if (it == nullptr or it == m_end) {
+    if (it == nullptr || it == m_end) {
       return false;
     }
 
@@ -189,7 +190,7 @@ public:
     Node *parent = &it.get_parent();
     Node *substitute = (&it)->right_child;
     Node *save = nullptr;
-    if (substitute != nullptr and substitute->left_child == nullptr) {
+    if (substitute != nullptr && substitute->left_child == nullptr) {
       save = substitute;
       substitute->parent = parent;
       substitute->left_child = (&it)->left_child;
@@ -246,7 +247,7 @@ public:
     using iterator_reference = iterator &;
 
     /// Make this iterator points to "ptr" or nullptr if no pointer is provided.
-    iterator(node_pointer ptr = nullptr) { this->m_pointer = ptr; }
+    explicit iterator(node_pointer ptr = nullptr) { this->m_pointer = ptr; }
     /// Makes this iterator points to the same address "copy" does.
     iterator(const iterator &copy) { this->m_pointer = copy.m_pointer; }
     /// Default destructor.
@@ -392,4 +393,4 @@ private:
 };
 } // namespace tree
 
-#endif // BST_H
+#endif // SRC_INCLUDE_BINARYSEARCHTREE_BINARYSEARCHTREE_H_

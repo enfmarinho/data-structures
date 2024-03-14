@@ -1,5 +1,5 @@
-#ifndef STACK_H
-#define STACK_H
+#ifndef SRC_INCLUDE_STACK_STACK_H_
+#define SRC_INCLUDE_STACK_STACK_H_
 
 #include <cstddef> // size_t, ptrdiff_t
 #include <deque>
@@ -79,4 +79,4 @@ private:
 };
 } // namespace sc
 
-#endif // STACK_H
+#endif // SRC_INCLUDE_STACK_STACK_H_

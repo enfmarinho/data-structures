@@ -37,7 +37,7 @@ TEST(SpecialFunctions, InitializerListConstructor) {
   lib::queue<int> queue1(ilist1);
   ASSERT_EQ(queue1.size(), ilist1.size());
   int counter{0};
-  while (not queue1.empty()) {
+  while (!queue1.empty()) {
     ASSERT_EQ(queue1.front(), ++counter);
     queue1.pop();
   }
@@ -45,7 +45,7 @@ TEST(SpecialFunctions, InitializerListConstructor) {
   lib::queue<int, std::list<int>> queue2(ilist1);
   ASSERT_EQ(queue2.size(), ilist1.size());
   counter = 0;
-  while (not queue2.empty()) {
+  while (!queue2.empty()) {
     ASSERT_EQ(queue2.front(), ++counter);
     queue2.pop();
   }
@@ -63,7 +63,7 @@ TEST(SpecialFunctions, CopyConstructor) {
   lib::queue<int> queue1_copy(queue1);
   ASSERT_EQ(queue1_copy.size(), 5);
   int counter{0};
-  while (not queue1_copy.empty()) {
+  while (!queue1_copy.empty()) {
     ASSERT_EQ(queue1_copy.front(), ++counter);
     queue1_copy.pop();
   }
@@ -71,7 +71,7 @@ TEST(SpecialFunctions, CopyConstructor) {
   lib::queue<int, std::list<int>> queue2(ilist1);
   lib::queue<int, std::list<int>> queue2_copy(queue2);
   counter = 0;
-  while (not queue2_copy.empty()) {
+  while (!queue2_copy.empty()) {
     ASSERT_EQ(queue2_copy.front(), ++counter);
     queue2_copy.pop();
   }
@@ -86,14 +86,14 @@ TEST(SpecialFunctions, RangeConstructor) {
   sc::queue<int> queue1(array, array + 6);
   EXPECT_EQ(queue1.size(), 6);
   int counter{0};
-  while (not queue1.empty()) {
+  while (!queue1.empty()) {
     EXPECT_EQ(queue1.front(), ++counter);
     queue1.pop();
   }
 
   sc::queue<int, std::list<int>> queue2(array, array + 6);
   counter = 0;
-  while (not queue2.empty()) {
+  while (!queue2.empty()) {
     EXPECT_EQ(queue2.front(), ++counter);
     queue2.pop();
   }
@@ -200,14 +200,14 @@ TEST(Modifiers, pop) {
   std::initializer_list<int> ilist1{1, 2, 3, 4, 5};
   lib::queue<int> queue1(ilist1);
   int counter{0};
-  while (not queue1.empty()) {
+  while (!queue1.empty()) {
     EXPECT_EQ(queue1.front(), ++counter);
     queue1.pop();
   }
 
   lib::queue<int, std::list<int>> queue2(ilist1);
   counter = 0;
-  while (not queue1.empty()) {
+  while (!queue1.empty()) {
     EXPECT_EQ(queue1.front(), ++counter);
     queue1.pop();
   }

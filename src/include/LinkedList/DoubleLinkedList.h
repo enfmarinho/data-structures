@@ -1,6 +1,7 @@
-#ifndef DOUBLE_LINKED_LIST_H
-#define DOUBLE_LINKED_LIST_H
+#ifndef SRC_INCLUDE_LINKEDLIST_DOUBLELINKEDLIST_H_
+#define SRC_INCLUDE_LINKEDLIST_DOUBLELINKEDLIST_H_
 
+#include <algorithm>  // sort
 #include <climits>    // INT_MAX
 #include <cstddef>    // size_t
 #include <functional> // function<>, equal_to<>, less<>
@@ -64,12 +65,14 @@ public:
     assign(first, last);
   }
   /*!
-   * Copy constructor. Creates a list equivalent to "copy".
+   * Copy constructor. Creates a list equivalent to "copy", copy will not be
+   * changed, it is not passed by const_reference because there is no
+   * const_iterator.
    * \param copy list to be copied.
    */
-  list(list &other) {
+  list(list &copy) {
     initialize();
-    assign(other);
+    assign(copy);
   }
   /*!
    * Move constructor. Creates a list with the nodes of "other" list.
@@ -216,13 +219,13 @@ public:
 
   ///=== [II] Element Access.
   /// Access the element in the front of the container.
-  reference front() { return m_head->next->data; };
+  reference front() { return m_head->next->data; }
   /// Access the element in the front of the container.
-  const_reference front() const { return m_head->next->data; };
+  const_reference front() const { return m_head->next->data; }
   /// Access the element in the end of the container.
-  reference back() { return m_tail->previous->data; };
+  reference back() { return m_tail->previous->data; }
   /// Access the element in the end of the container.
-  const_reference back() const { return m_tail->previous->data; };
+  const_reference back() const { return m_tail->previous->data; }
 
   ///=== [III] Iterators.
   /*!
@@ -397,7 +400,7 @@ public:
   void merge(iterator left_runner, iterator right_runner, iterator right_end,
              Compare comp = std::less<value_type>()) {
     iterator left_end = right_runner;
-    while (left_runner != left_end and right_runner != right_end) {
+    while (left_runner != left_end && right_runner != right_end) {
       if (comp(*right_runner, *left_runner)) {
         iterator right_next = right_runner + 1;
         erase_not_deleting(right_runner);
@@ -419,7 +422,7 @@ public:
   void merge(list &&other, Compare comp = std::less<value_type>()) {
     auto this_runner = begin();
     auto other_runner = other.begin();
-    while (this_runner != end() and other_runner != other.end()) {
+    while (this_runner != end() && other_runner != other.end()) {
       if (comp(*this_runner, *other_runner)) {
         ++this_runner;
       } else {
@@ -556,7 +559,7 @@ public:
     /// Default constructor.
     iterator() = default;
     /// Makes a iterator pointing to the node at the address "pointer".
-    iterator(node_pointer pointer) : m_pointer{pointer} {}
+    iterator(node_pointer ptr) : m_pointer{ptr} {}
     /// Copy constructor.
     iterator(const iterator &) = default;
     /// Destructor.
@@ -732,4 +735,4 @@ private:
 };
 } // namespace sc
 
-#endif // DOUBLE_LINKED_LIST_H
+#endif // SRC_INCLUDE_LINKEDLIST_DOUBLELINKEDLIST_H_

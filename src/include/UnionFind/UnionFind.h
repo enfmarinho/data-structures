@@ -1,7 +1,8 @@
-#ifndef UNION_FIND_H
-#define UNION_FIND_H
+#ifndef SRC_INCLUDE_UNIONFIND_UNIONFIND_H_
+#define SRC_INCLUDE_UNIONFIND_UNIONFIND_H_
 
 #include <cstddef> // size_t, ptrdiff_t
+#include <cstdint> // int64_t
 #include <utility> // move
 #include <vector>
 
@@ -15,7 +16,7 @@ namespace tree {
 class UnionFind {
 public:
   //=== Aliases.
-  using value_type = long long int;
+  using value_type = std::int64_t;
   using pointer = value_type *;
   using const_pointer = const value_type *;
   using reference = value_type &;
@@ -28,10 +29,10 @@ public:
    * Creates a container with "size" elements and "size" groups, each element
    * belonging to its own group.
    */
-  UnionFind(size_type size) : m_size{size}, m_number_of_groups{size} {
+  explicit UnionFind(size_type size) : m_size{size}, m_number_of_groups{size} {
     m_group_id.resize(size, 0);
     m_groups_size.resize(size, 0);
-    for (int value{0}; value < size; ++value) {
+    for (unsigned int value{0}; value < size; ++value) {
       m_group_id[value] = value;
       m_groups_size[value] = 1;
     }
@@ -124,4 +125,4 @@ private:
 };
 } // namespace tree
 
-#endif // UNION_FIND_H
+#endif // SRC_INCLUDE_UNIONFIND_UNIONFIND_H_

@@ -1,13 +1,15 @@
-#ifndef DEQUE_H
-#define DEQUE_H
+#ifndef SRC_INCLUDE_DEQUE_DEQUE_H_
+#define SRC_INCLUDE_DEQUE_DEQUE_H_
 
 #include <algorithm> // move
 #include <array>
+#include <cmath>   // floor, ceil
 #include <cstddef> // size_t, ptrdiff_t
 #include <cstdlib> // abs
 #include <initializer_list>
 #include <iterator> // distance
 #include <memory>   // unique_ptr, make_unique
+#include <utility>  // move
 #include <vector>
 
 // Namespace for sequential containers(sc).
@@ -77,7 +79,7 @@ public:
    */
   template <typename InputIt> deque(InputIt first, InputIt last) {
     initialize_control_variables();
-    size_type range_size = last - first;
+    difference_type range_size = last - first;
     if (range_size == 0) {
       return;
     }
@@ -401,7 +403,7 @@ public:
       m_element = other.m_element;
       return *this;
     }
-    DequeIterator(iterator other)
+    explicit DequeIterator(iterator other)
         : m_block(other.get_block_it()), m_element(other.get_element_it()) {}
     /// Dereference operator
     reference operator*() { return *m_element; }
@@ -448,7 +450,8 @@ public:
       if (increment > 0) {
         difference_type element_index = it.m_element - (*it.m_block)->begin();
         difference_type blocks_to_advance =
-            std::floor(element_index + increment) / (float)BlockSize;
+            std::floor(element_index + increment) /
+            static_cast<float>(BlockSize);
         element_index = (element_index + (increment % BlockSize)) % BlockSize;
         result.m_block = it.m_block + blocks_to_advance;
         result.m_element = (*result.m_block)->begin() + element_index;
@@ -485,7 +488,7 @@ public:
     }
     /// Checks whether "lhs" is equal to "rhs".
     friend bool operator==(const DequeIterator &lhs, const DequeIterator &rhs) {
-      return lhs.m_element == rhs.m_element and lhs.m_block == rhs.m_block;
+      return lhs.m_element == rhs.m_element && lhs.m_block == rhs.m_block;
     }
     /// Checks whether "lhs" is difference than "rhs".
     friend bool operator!=(const DequeIterator &lhs, const DequeIterator &rhs) {
@@ -544,7 +547,7 @@ private:
   iterator space_vacancy(position_e position, iterator pos, size_type count) {
     size_type vacancy = block_vacancy(position);
     difference_type require_blocks =
-        std::ceil(((float)count - vacancy) / BlockSize);
+        std::ceil((static_cast<float>(count) - vacancy) / BlockSize);
     if (mob_vacancy(position) < require_blocks) {
       difference_type index = pos - m_head;
       reallocate_mob(2 * m_size + count);
@@ -582,7 +585,7 @@ private:
    * \param new_size minimum capacity that the mob should have.
    */
   void reallocate_mob(size_type new_size) {
-    new_size = std::ceil((float)new_size / BlockSize);
+    new_size = std::ceil(static_cast<float>(new_size) / BlockSize);
     if (new_size > m_mob_capacity) {
       size_type size_difference = new_size - m_mob_capacity;
       block_list_t new_mob(new_size);
@@ -650,4 +653,4 @@ private:
 };
 } // namespace sc
 
-#endif // DEQUE_H
+#endif // SRC_INCLUDE_DEQUE_DEQUE_H_

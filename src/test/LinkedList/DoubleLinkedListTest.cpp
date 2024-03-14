@@ -364,13 +364,13 @@ TEST(Modifiers, InsertInitializerList) {
 
 TEST(Modifiers, InsertCopies) {
   lib::list<int> list1;
-  list1.insert(list1.begin(), (size_t)2, 99);
+  list1.insert(list1.begin(), static_cast<size_t>(2), 99);
   EXPECT_EQ(list1.size(), 2);
   for (auto v : list1) {
     EXPECT_EQ(v, 99);
   }
 
-  list1.insert(list1.end(), (size_t)6, 44);
+  list1.insert(list1.end(), static_cast<size_t>(6), 44);
   EXPECT_EQ(list1.size(), 8);
   int index{0};
   for (auto v : list1) {
@@ -381,7 +381,7 @@ TEST(Modifiers, InsertCopies) {
     }
   }
 
-  list1.insert(++(++list1.begin()), (size_t)3, 22);
+  list1.insert(++(++list1.begin()), static_cast<size_t>(3), 22);
   EXPECT_EQ(list1.size(), 11);
   index = 0;
   for (auto v : list1) {
@@ -581,7 +581,7 @@ TEST(Operations, remove_if) {
   sc::list<int> list3{-3, 3, 9, 1, -9, -12, 99, 17, 8, -8, 0};
   EXPECT_EQ(list3.remove_if(functions.positive), 6);
   for (auto v : list3) {
-    EXPECT_TRUE(v <= 0);
+    EXPECT_LE(v, 0);
   }
 }
 

@@ -1,5 +1,5 @@
-#ifndef VECTOR_H
-#define VECTOR_H
+#ifndef SRC_INCLUDE_VECTOR_VECTOR_H_
+#define SRC_INCLUDE_VECTOR_VECTOR_H_
 
 #include <cstddef> // size_t, ptrdiff_t
 #include <initializer_list>
@@ -34,7 +34,7 @@ public:
    * \param count number of elements to insert.
    * \param value data to store in the vector.
    */
-  vector(size_type count = 0, value_type value = T()) {
+  explicit vector(size_type count = 0, value_type value = T()) {
     if (count > 0) {
       m_size = count;
       m_capacity = count;
@@ -61,7 +61,7 @@ public:
   vector(const vector &copy) {
     reserve(copy.m_capacity);
     m_size = copy.m_size;
-    for (int index{0}; index < m_size; ++index) {
+    for (size_type index{0}; index < m_size; ++index) {
       m_array[index] = copy.m_array[index];
     }
   }
@@ -179,7 +179,7 @@ public:
   void shrink_to_fit() {
     if (m_capacity > m_size) {
       pointer tmp = new value_type[m_size];
-      for (int index{0}; index < m_size; ++index) {
+      for (size_type index{0}; index < m_size; ++index) {
         tmp[index] = m_array[m_size];
       }
       delete[] m_array;
@@ -365,7 +365,7 @@ public:
      * Constructs the iterator.
      * \param pointer to a value in the container.
      */
-    iterator(pointer pointer) { m_pointer = pointer; }
+    explicit iterator(pointer ptr) { this->m_pointer = ptr; }
     /// Default copy constructor.
     iterator(const iterator &copy) = default;
     /// Default destructor.
@@ -392,11 +392,11 @@ public:
       return iterator(copy);
     }
     /// Increment operator.
-    friend iterator operator+(iterator it, int increment) {
+    friend iterator operator+(iterator it, difference_type increment) {
       return iterator(&it + increment);
     }
     /// Increment operator.
-    friend iterator operator+(int increment, iterator it) {
+    friend iterator operator+(difference_type increment, iterator it) {
       return iterator(&it + increment);
     }
     /// Pre-decrement.
@@ -411,7 +411,7 @@ public:
       return iterator(copy);
     }
     /// Decrement operator.
-    friend iterator operator-(iterator it, int decrement) {
+    friend iterator operator-(iterator it, difference_type decrement) {
       return iterator(&it - decrement);
     }
     /// Difference operator.
@@ -446,4 +446,4 @@ private:
 };
 } // namespace sc
 
-#endif // VECTOR_H
+#endif // SRC_INCLUDE_VECTOR_VECTOR_H_

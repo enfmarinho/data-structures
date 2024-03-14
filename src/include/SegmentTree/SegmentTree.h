@@ -1,5 +1,5 @@
-#ifndef SEGMENT_TREE_H
-#define SEGMENT_TREE_H
+#ifndef SRC_INCLUDE_SEGMENTTREE_SEGMENTTREE_H_
+#define SRC_INCLUDE_SEGMENTTREE_SEGMENTTREE_H_
 
 #include <cstddef> // size_t
 #include <limits>  // numeric_limits
@@ -132,9 +132,9 @@ private:
   /// Consults a interval in the container.
   value_type query(size_type interval_begin, size_type interval_end,
                    size_type index, size_type begin, size_type end) {
-    if (interval_end < begin or interval_begin > end) {
+    if (interval_end < begin || interval_begin > end) {
       return m_neutral_element;
-    } else if (interval_begin <= begin and end <= interval_end) {
+    } else if (interval_begin <= begin && end <= interval_end) {
       return m_tree[index];
     }
     size_type mid = (begin + end) / 2;
@@ -145,7 +145,7 @@ private:
   /// Changes a value in the container.
   value_type update(size_type position, value_type value, size_type index,
                     size_type begin, size_type end) {
-    if (position < begin or position > end) {
+    if (position < begin || position > end) {
       return m_tree[index];
     } else if (begin == end) {
       return m_tree[index] = value;
@@ -162,4 +162,4 @@ private:
 };
 } // namespace tree
 
-#endif // SEGMENT_TREE_H
+#endif // SRC_INCLUDE_SEGMENTTREE_SEGMENTTREE_H_

@@ -1,11 +1,12 @@
-#ifndef TRIE_H
-#define TRIE_H
+#ifndef SRC_INCLUDE_TRIE_TRIE_H_
+#define SRC_INCLUDE_TRIE_TRIE_H_
 
 #include <cstddef> // size_t, ptrdiff_t
 #include <map>
 #include <stack>
 #include <string>
 #include <utility> // swap
+#include <vector>
 
 // Namespace for tree data structures.
 namespace tree {
@@ -36,7 +37,7 @@ public:
    * \param words initializer_list with the strings to insert.
    */
   Trie(const std::initializer_list<std::string> &words) {
-    for (std::string word : words) {
+    for (const std::string &word : words) {
       insert(word);
     }
   }
@@ -45,7 +46,9 @@ public:
    * \param word string to be inserted.
    * \param count number of times to insert the string.
    */
-  Trie(const std::string &word, size_type count = 1) { insert(word, count); }
+  explicit Trie(const std::string &word, size_type count = 1) {
+    insert(word, count);
+  }
   /*!
    * Constructs a clone of the trie "other".
    * \param other trie to be cloned.
@@ -53,7 +56,7 @@ public:
   Trie(const Trie &other) {
     // TODO optimize this, it can be easily done be going node by node.
     std::vector<std::string> words = other.consult_words();
-    for (std::string word : words) {
+    for (const std::string &word : words) {
       insert(word);
     }
   }
@@ -202,8 +205,8 @@ public:
       return true;
     }
     char last_letter;
-    while (not pointers.empty() and pointers.top().second->count <= 1 and
-           not pointers.top().second->table.empty()) {
+    while (!pointers.empty() && pointers.top().second->count <= 1 &&
+           !pointers.top().second->table.empty()) {
       delete pointers.top().second;
       last_letter = pointers.top().first;
       pointers.pop();
@@ -227,7 +230,7 @@ private:
   /// Helper function to traverse the trie saving its string in the vector.
   void traverse(std::vector<std::string> &words, std::string &word,
                 Node *current) const {
-    for (int counter{0}; counter < current->count; ++counter) {
+    for (unsigned int counter{0}; counter < current->count; ++counter) {
       words.push_back(word);
     }
     for (std::pair<char, Node *> pair : current->table) {
@@ -242,4 +245,4 @@ private:
 };
 } // namespace tree
 
-#endif // TRIE_H
+#endif // SRC_INCLUDE_TRIE_TRIE_H_

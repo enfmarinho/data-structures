@@ -38,7 +38,7 @@ TEST(SpecialFunctions, InitializerListConstructor) {
   lib::stack<int> stack1(ilist1);
   ASSERT_EQ(stack1.size(), ilist1.size());
   int counter{5};
-  while (not stack1.empty()) {
+  while (!stack1.empty()) {
     ASSERT_EQ(stack1.top(), --counter);
     stack1.pop();
   }
@@ -46,7 +46,7 @@ TEST(SpecialFunctions, InitializerListConstructor) {
   lib::stack<int, std::list<int>> stack2(ilist1);
   ASSERT_EQ(stack2.size(), ilist1.size());
   counter = 5;
-  while (not stack2.empty()) {
+  while (!stack2.empty()) {
     ASSERT_EQ(stack2.top(), --counter);
     stack2.pop();
   }
@@ -64,7 +64,7 @@ TEST(SpecialFunctions, CopyConstructor) {
   lib::stack<int> stack1_copy(stack1);
   ASSERT_EQ(stack1_copy.size(), 5);
   int counter{6};
-  while (not stack1_copy.empty()) {
+  while (!stack1_copy.empty()) {
     ASSERT_EQ(stack1_copy.top(), --counter);
     stack1_copy.pop();
   }
@@ -72,7 +72,7 @@ TEST(SpecialFunctions, CopyConstructor) {
   lib::stack<int, std::list<int>> stack2(ilist1);
   lib::stack<int, std::list<int>> stack2_copy(stack2);
   counter = 6;
-  while (not stack2_copy.empty()) {
+  while (!stack2_copy.empty()) {
     ASSERT_EQ(stack2_copy.top(), --counter);
     stack2_copy.pop();
   }
@@ -87,14 +87,14 @@ TEST(SpecialFunctions, RangeConstructor) {
   sc::stack<int> stack1(array, array + 6);
   EXPECT_EQ(stack1.size(), 6);
   int counter{7};
-  while (not stack1.empty()) {
+  while (!stack1.empty()) {
     EXPECT_EQ(stack1.top(), --counter);
     stack1.pop();
   }
 
   sc::stack<int, std::list<int>> stack2(array, array + 6);
   counter = 7;
-  while (not stack2.empty()) {
+  while (!stack2.empty()) {
     EXPECT_EQ(stack2.top(), --counter);
     stack2.pop();
   }
@@ -179,14 +179,14 @@ TEST(Modifiers, pop) {
   std::initializer_list<int> ilist1{1, 2, 3, 4, 5};
   lib::stack<int> stack1(ilist1);
   int counter{6};
-  while (not stack1.empty()) {
+  while (!stack1.empty()) {
     EXPECT_EQ(stack1.top(), --counter);
     stack1.pop();
   }
 
   lib::stack<int, std::list<int>> stack2(ilist1);
   counter = 6;
-  while (not stack1.empty()) {
+  while (!stack1.empty()) {
     EXPECT_EQ(stack1.top(), --counter);
     stack1.pop();
   }

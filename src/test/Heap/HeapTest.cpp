@@ -204,7 +204,7 @@ TEST(Modifiers, PushPopTop) {
   }
   int heap4_last = heap4.top();
   int heap5_last = heap5.top();
-  while (!heap4.empty() and !heap5.empty()) {
+  while (!heap4.empty() && !heap5.empty()) {
     heap4.pop();
     heap5.pop();
     EXPECT_TRUE(heap4_last >= heap4.top());

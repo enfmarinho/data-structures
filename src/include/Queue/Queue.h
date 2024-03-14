@@ -1,5 +1,5 @@
-#ifndef QUEUE_H
-#define QUEUE_H
+#ifndef SRC_INCLUDE_QUEUE_QUEUE_H_
+#define SRC_INCLUDE_QUEUE_QUEUE_H_
 
 #include <cstddef> // size_t
 #include <deque>
@@ -83,4 +83,4 @@ private:
 };
 } // namespace sc
 
-#endif // QUEUE_H
+#endif // SRC_INCLUDE_QUEUE_QUEUE_H_

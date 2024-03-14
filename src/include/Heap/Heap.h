@@ -1,5 +1,5 @@
-#ifndef HEAP_H
-#define HEAP_H
+#ifndef SRC_INCLUDE_HEAP_HEAP_H_
+#define SRC_INCLUDE_HEAP_HEAP_H_
 
 #include <cstddef>    // size_t, ptrdiff_t
 #include <functional> // less
@@ -120,7 +120,7 @@ public:
     m_data[0] = m_data.back();
     m_data.pop_back();
     size_type curr_index = 0;
-    while (Compare{}(m_data[curr_index], left_child(curr_index)) or
+    while (Compare{}(m_data[curr_index], left_child(curr_index)) ||
            Compare{}(m_data[curr_index], right_child(curr_index))) {
       size_type new_index;
       if (Compare{}(left_child(curr_index), right_child(curr_index))) {
@@ -165,4 +165,4 @@ private:
 };
 } // namespace tree
 
-#endif // HEAP_H
+#endif // SRC_INCLUDE_HEAP_HEAP_H_

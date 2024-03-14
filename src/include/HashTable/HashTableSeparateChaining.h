@@ -1,8 +1,9 @@
-#ifndef HASH_TABLE_SEPARATE_CHAINING_H
-#define HASH_TABLE_SEPARATE_CHAINING_H
+#ifndef SRC_INCLUDE_HASHTABLE_HASHTABLESEPARATECHAINING_H_
+#define SRC_INCLUDE_HASHTABLE_HASHTABLESEPARATECHAINING_H_
 
 #include <cmath>      // ceil
 #include <cstddef>    // size_t, ptrdiff_t
+#include <cstdint>    // int64_t, uint64_t
 #include <functional> // equal_to, hash
 #include <initializer_list>
 #include <iterator> // distance
@@ -52,7 +53,7 @@ public:
    * \param bucket_count capacity of the container. If not provided, default
    * will be used.
    */
-  HashTable(size_type bucket_count = DEFAULT_SIZE) {
+  explicit HashTable(size_type bucket_count = DEFAULT_SIZE) {
     m_table.resize(find_next_prime(bucket_count));
   }
   /*!
@@ -247,7 +248,7 @@ public:
     return counter;
   }
   /// Inserts all elements in "other" into this hash table.
-  void merge(HashTable &other) {
+  void merge(const HashTable &other) {
     for (value_type element : other) {
       insert(element);
     }
@@ -341,7 +342,9 @@ public:
 
   ///=== [VII] Hash Policy.
   /// Calculates the average number of elements per bucket
-  float load_factor() const { return m_table.size() / (float)bucket_count(); }
+  float load_factor() const {
+    return m_table.size() / static_cast<float>(bucket_count());
+  }
   /// Returns the current max load factor.
   float max_load_factor() const { return m_max_load_factor; }
   /// Sets the maximum load factor to "load_factor".
@@ -404,7 +407,7 @@ public:
     /// Goes to the next element.
     HashTableIterator &operator++() {
       ++m_element;
-      while (m_element == m_bucket->end() and m_bucket != m_table_end) {
+      while (m_element == m_bucket->end() && m_bucket != m_table_end) {
         if (++m_bucket == m_table_end) {
           m_element = (m_bucket - 1)->end();
           break;
@@ -440,7 +443,7 @@ public:
         --m_element;
       } else {
         m_element = --(--m_bucket.end());
-        while (m_bucket->begin() == m_bucket->end() and
+        while (m_bucket->begin() == m_bucket->end() &&
                m_bucket != m_table_begin) {
           m_element = --(--m_bucket)->end();
         }
@@ -462,7 +465,7 @@ public:
       return m_element == rhs.m_element;
     }
     /// Checks whether or not this iterator is different than "rhs".
-    bool operator!=(const HashTableIterator &rhs) { return not(*this == rhs); }
+    bool operator!=(const HashTableIterator &rhs) { return !(*this == rhs); }
 
   private:
     TableIt m_table_begin; //!< Iterator to the begin of the table.
@@ -481,7 +484,7 @@ public:
     // witnesses are enough to determine the primarily using the Miller-Robin
     // algorithm.
     std::vector<int> witnesses{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37};
-    while (not miller_rabin(number, witnesses)) {
+    while (!miller_rabin(number, witnesses)) {
       ++number;
     }
     return number;
@@ -494,23 +497,22 @@ public:
    */
   static bool miller_rabin(const size_type &number,
                            const std::vector<int> &witnesses) {
-    using u128 = __uint128_t;
+    using u64 = uint64_t;
     if (number < 2) {
       return false;
     }
     int shifts = __builtin_ctzll(number - 1);
-    long long power = number >> shifts;
-    for (int witness : witnesses) {
+    int64_t power = number >> shifts;
+    for (unsigned int witness : witnesses) {
       if (number == witness) {
         return true;
       }
-      long long pow = binary_exponentiation(witness, power, number);
-      long long counter = shifts;
-      while (pow != 1 and pow != number - 1 and witness % number and
-             counter--) {
-        pow = (u128)pow * pow % number;
+      uint64_t pow = binary_exponentiation(witness, power, number);
+      int64_t counter = shifts;
+      while (pow != 1 && pow != number - 1 && witness % number && counter--) {
+        pow = static_cast<u64>(pow) * pow % number;
       }
-      if (pow != number - 1 and counter != shifts) {
+      if (pow != number - 1 && counter != shifts) {
         return false;
       }
     }
@@ -541,9 +543,9 @@ private:
   std::vector<list_type> m_table; //!< Scatter table.
   size_type m_size{0};            //!< Number of elements in the container.
   float m_max_load_factor{1.0};   //!< Max load factor.
-  const static size_type DEFAULT_SIZE =
+  static const size_type DEFAULT_SIZE =
       11; //!< Minimum number of buckets to initialize the container.
 };
 } // namespace ac
 
-#endif // HASH_TABLE_SEPARATE_CHAINING_H
+#endif // SRC_INCLUDE_HASHTABLE_HASHTABLESEPARATECHAINING_H_
