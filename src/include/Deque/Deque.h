@@ -423,9 +423,9 @@ public:
     }
     /// Post increment operator.
     DequeIterator &operator++(int) {
-      DequeIterator copy = *this;
+      DequeIterator cp = *this;
       ++(*this);
-      return *this;
+      return cp;
     }
     /// Decrement operator.
     DequeIterator &operator--() {
@@ -439,9 +439,9 @@ public:
     }
     /// Post decrement operator.
     DequeIterator &operator--(int) {
-      DequeIterator copy = *this;
+      DequeIterator cp = *this;
       --(*this);
-      return copy;
+      return cp;
     }
     /// Sum operator
     friend DequeIterator operator+(const DequeIterator &it,
