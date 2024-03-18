@@ -423,7 +423,7 @@ public:
       return copy;
     }
     friend HashTableIterator operator+(HashTableIterator it,
-                                       size_type increment) {
+                                       difference_type increment) {
       HashTableIterator result = it;
       for (size_type counter{0}; counter < increment; ++counter) {
         ++result;
