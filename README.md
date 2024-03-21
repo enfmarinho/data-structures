@@ -6,7 +6,7 @@ This repository contain a collection of data structures written in C++.
 
 ## Requirements
 
- - C++ compiler that supports at least C++17. I recommend clang or gcc.
+ - C++ compiler that supports at least C++17. I recommend clang.
  - Cmake version 3.5 or greater.
  - Googletest framework. To install it run the commands bellow:
 ```bash
@@ -36,7 +36,7 @@ directory, so just run:
 ./build/NAME
 ```
 Where NAME is the name of the executable to run. The name of the executables are
-just the name of the files in snake case style, for example, the executable 
+just the name of the test files in snake case style, i.e. the executable 
 generated for BinarySearchTreeTest.cpp is named binary_search_tree_test.
 
 # Implemented data structures
@@ -45,7 +45,7 @@ generated for BinarySearchTreeTest.cpp is named binary_search_tree_test.
 - [Deque](src/include/Deque/Deque.h)
 - [Hash table](src/include/HashTable/HashTableSeparateChaining.h)
 - [Heap](src/include/Heap/Heap.h)
-- [Double Linked list](src/include/LinkedList/DoubleLinkedList.h)
+- [Double linked list](src/include/LinkedList/DoubleLinkedList.h)
 - [Queue](src/include/Queue/Queue.h)
 - [Red black tree](src/include/RedBlackTree/RedBlackTreeUnique.h)
 - [Red black tree with fat nodes](src/include/RedBlackTree/RedBlackTreeFatNodes.h)
@@ -60,6 +60,7 @@ generated for BinarySearchTreeTest.cpp is named binary_search_tree_test.
 To use any of the data structure here you just need to copy the .h file of its
 implementation and include in your project. The tests can be used as a code demo
 and the implementation is, in most cases, well documented to facilitate use.
+I recommend running the tests before use it.
 
 # License
 
