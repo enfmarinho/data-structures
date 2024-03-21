@@ -422,7 +422,7 @@ public:
       return *this;
     }
     /// Post increment operator.
-    DequeIterator &operator++(int) {
+    DequeIterator operator++(int) {
       DequeIterator cp = *this;
       ++(*this);
       return cp;
