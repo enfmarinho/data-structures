@@ -11,8 +11,8 @@
  * the integrity of the tests, the std::unordered_multiset must be used, to
  * effectively test the Hash Table developed the ac::HashTable must be used.
  */
-// #define HashTable std::unordered_multiset
 #define HashTable ac::HashTable
+// #define HashTable std::unordered_multiset
 
 TEST(SpecialFunction, DefaultConstructor) {
   HashTable<int> hash1;
@@ -104,51 +104,11 @@ TEST(SpecialFunction, MoveConstructor) {
   // TODO
 }
 
-TEST(Iterators, Copy) {
+TEST(Iterator, IteratorOperations) {
   // TODO
 }
 
-TEST(Iterators, begin) {
-  // TODO
-}
-
-TEST(Iterators, end) {
-  // TODO
-}
-
-TEST(Iterators, cbegin) {
-  // TODO
-}
-
-TEST(Iterators, cend) {
-  // TODO
-}
-
-TEST(Iterators, Increment) {
-  // TODO
-}
-
-TEST(Iterators, Decrement) {
-  // TODO
-}
-
-TEST(Iterators, EqualityOperator) {
-  // TODO
-}
-
-TEST(Iterators, InequalityOperator) {
-  // TODO
-}
-
-TEST(Iterator, ReferenceOperator) {
-  // TODO
-}
-
-TEST(Iterator, DereferenceOperator) {
-  // TODO
-}
-
-TEST(Iterator, ArrowOperator) {
+TEST(ConstIterator, ConstIteratorOperations) {
   // TODO
 }
 
